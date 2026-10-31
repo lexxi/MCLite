@@ -14,3 +14,7 @@ firmware/.pio/
 *.swp
 *.swo
 *.bak
+
+# Standalone SD maintenance build
+tools/sd-maintenance/.pio/
+tools/sd-maintenance/__pycache__/
