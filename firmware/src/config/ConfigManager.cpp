@@ -975,7 +975,64 @@ bool ConfigManager::removeRoomAt(size_t i) {
     return true;
 }
 
+bool ConfigManager::importJson(const String& json, String& error) {
+    auto fail = [&](const char* message) { error = message; return false; };
+    if (_importPending || json.length() == 0 || json.length() > 32768)
+        return fail("Datei leer, zu gross oder Neustart ausstehend.");
+    JsonDocument doc;
+    if (deserializeJson(doc, json) || !doc.is<JsonObject>())
+        return fail("Keine gueltige JSON-Konfiguration.");
+    if (!doc["device"]["name"].is<String>() ||
+        doc["device"]["name"].as<String>().length() == 0 || !doc["radio"].is<JsonObject>())
+        return fail("device.name und radio werden benoetigt.");
+    JsonObject radio = doc["radio"];
+    for (const char* field : {"frequency", "bandwidth", "spreading_factor", "coding_rate", "tx_power"})
+        if (!radio[field].is<float>()) return fail("Funkparameter fehlen oder sind keine Zahlen.");
+    float freq = radio["frequency"], bw = radio["bandwidth"];
+    float sf = radio["spreading_factor"], cr = radio["coding_rate"], power = radio["tx_power"];
+    if (!(freq >= 150 && freq <= 960 && bw >= 7.8f && bw <= 500 &&
+          sf >= 5 && sf <= 12 && cr >= 5 && cr <= 8 && power >= -9 && power <= 22) ||
+        sf != (int)sf || cr != (int)cr || power != (int)power)
+        return fail("Ungueltige Funkparameter.");
+    // Preserve identity when the section is omitted; explicitly supplied keys
+    // must be well-formed in either format accepted by MCLiteMesh.
+    if (doc["identity"].isNull()) {
+        doc["identity"]["private_key"] = _config.privateKey;
+        doc["identity"]["public_key"] = _config.publicKey;
+    }
+    auto validKey = [](const String& key, size_t bytes) {
+        if (key.length() == bytes * 2 && isHexString(key)) return true;
+        uint8_t decoded[64]; size_t n = 0;
+        return mbedtls_base64_decode(decoded, sizeof(decoded), &n,
+            (const uint8_t*)key.c_str(), key.length()) == 0 && n == bytes;
+    };
+    if (!validKey(doc["identity"]["private_key"].as<String>(), 64) ||
+        !validKey(doc["identity"]["public_key"].as<String>(), 32))
+        return fail("Ungueltige Identitaet: privater/oeffentlicher Schluessel.");
+    for (const char* name : {"contacts", "channels", "room_servers"})
+        if (!doc[name].isNull() && !doc[name].is<JsonArray>())
+            return fail("contacts/channels/room_servers muessen Arrays sein.");
+    String staged;
+    if (!serializeJson(doc, staged) || staged.length() > 32768)
+        return fail("Konfiguration zu gross.");
+    // Exercise the actual parser on a separate instance. Live radio/UI keep
+    // using the old configuration until reboot; no partial live application.
+    ConfigManager candidate;
+    candidate.applyDefaults();
+    if (!candidate.parseJson(staged)) return fail("Konfiguration nicht lesbar.");
+    auto& sd = SDCard::instance();
+    if (!sd.isMounted()) return fail("Keine microSD-Karte.");
+    String previous = sd.readFile(defaults::CONFIG_PATH);
+    if (previous.length() == 0 || !sd.writeAtomic("/config.pre-upload.json", previous))
+        return fail("Sicherung fehlgeschlagen. Konfiguration unveraendert.");
+    if (!sd.writeAtomic(defaults::CONFIG_PATH, staged))
+        return fail("Schreiben fehlgeschlagen. Sicherung vorhanden.");
+    _importPending = true; // block old runtime settings from overwriting upload
+    return true;
+}
+
 bool ConfigManager::save() {
+    if (_importPending) return false;
     auto& sd = SDCard::instance();
     if (!sd.isMounted()) return false;
     String json = toJson();

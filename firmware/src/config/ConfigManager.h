@@ -209,6 +209,7 @@ public:
     enum LoadResult { LOAD_OK, LOAD_NO_FILE, LOAD_ERROR };
     LoadResult load();   // Load from SD card
     bool save();         // Save current config to SD card
+    bool importJson(const String& json, String& error); // validates/stages; reboot required
     bool generate();     // Generate default config with new identity
 
     // Append a new contact (typically discovered via heard adverts) and save
@@ -265,6 +266,7 @@ public:
 private:
     ConfigManager() = default;
     AppConfig _config;
+    bool _importPending = false;
     // A pin_code / admin_pin the loader refused (wrong length or charset). Kept so
     // toJson() writes it back verbatim instead of erasing the user's secret on the
     // next save -- they need to be able to read it to correct it.

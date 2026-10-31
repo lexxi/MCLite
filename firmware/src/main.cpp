@@ -21,6 +21,7 @@
 #include "storage/TelemetryCache.h"
 #include "util/TimeHelper.h"
 #include "net/WiFiManager.h"
+#include "net/ConfigPortal.h"
 #include "companion/CompanionService.h"
 #include <helpers/esp32/SerialWifiInterface.h>
 #include <helpers/ArduinoSerialInterface.h>
@@ -253,6 +254,8 @@ void setup() {
 }
 
 void loop() {
+    ConfigPortal::instance().update();
+    if (ConfigPortal::instance().restarting()) { delay(5); return; }
     GPS::instance().update();
     if (GPS::instance().isTimeSynced()) {
         uint32_t gpsEpoch = GPS::instance().currentTimestamp();

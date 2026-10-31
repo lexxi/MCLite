@@ -1375,6 +1375,47 @@ void test_config_load_cuts_scope_at_space() {
     TEST_ASSERT_EQUAL_STRING("west", cfg->config().radio.scope.c_str());
 }
 
+static String importFixture() {
+    return String("{\"device\":{\"name\":\"Uploaded\"},\"radio\":{\"frequency\":869.618,\"bandwidth\":62.5,\"spreading_factor\":8,\"coding_rate\":8,\"tx_power\":22}}");
+}
+static void test_import_preserves_identity_and_backup_until_reboot() {
+    auto& mgr = mclite::ConfigManager::instance();
+    mgr._importPending = false;
+    mgr.config().privateKey = String(std::string(128, 'a').c_str());
+    mgr.config().publicKey = String(std::string(64, 'b').c_str());
+    mgr.config().deviceName = "Before";
+    mclite::SDCard::instance()._mounted = true;
+    TEST_ASSERT_TRUE(mgr.save());
+    String old = getStubFile(mclite::defaults::CONFIG_PATH);
+    String error;
+    TEST_ASSERT_TRUE(mgr.importJson(importFixture(), error));
+    TEST_ASSERT_EQUAL_STRING(old.c_str(), getStubFile("/config.pre-upload.json").c_str());
+    TEST_ASSERT_EQUAL_STRING("Before", mgr.config().deviceName.c_str());
+    JsonDocument doc;
+    deserializeJson(doc, getStubFile(mclite::defaults::CONFIG_PATH));
+    TEST_ASSERT_EQUAL_STRING("Uploaded", doc["device"]["name"]);
+    TEST_ASSERT_EQUAL_STRING(mgr.config().privateKey.c_str(), doc["identity"]["private_key"]);
+    TEST_ASSERT_FALSE(mgr.save());
+    TEST_ASSERT_FALSE(mgr.importJson(importFixture(), error));
+    mgr._importPending = false;
+}
+static void test_import_rejects_bad_data_without_writing() {
+    auto& mgr = mclite::ConfigManager::instance();
+    mgr._importPending = false;
+    setStubFile(mclite::defaults::CONFIG_PATH, "unchanged");
+    String error;
+    for (const char* text : {"[]", "{}", "broken", "{\"device\":{\"name\":\"x\"},\"radio\":{}}"})
+        TEST_ASSERT_FALSE(mgr.importJson(String(text), error));
+    String badKey = importFixture();
+    badKey = badKey.substring(0, badKey.length()-1);
+    badKey += ",\"identity\":{\"private_key\":\"bad\",\"public_key\":\"bad\"}}";
+    TEST_ASSERT_FALSE(mgr.importJson(badKey, error));
+    TEST_ASSERT_EQUAL_STRING("unchanged", getStubFile(mclite::defaults::CONFIG_PATH).c_str());
+    mclite::SDCard::instance()._mounted = false;
+    TEST_ASSERT_FALSE(mgr.importJson(importFixture(), error));
+    mclite::SDCard::instance()._mounted = true;
+}
+
 int main() {
     UNITY_BEGIN();
 
@@ -1583,5 +1624,7 @@ int main() {
     RUN_TEST(test_sanitize_scope_trims_but_keeps_wildcard);
     RUN_TEST(test_config_load_cuts_scope_at_space);
 
+    RUN_TEST(test_import_preserves_identity_and_backup_until_reboot);
+    RUN_TEST(test_import_rejects_bad_data_without_writing);
     return UNITY_END();
 }

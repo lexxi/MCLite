@@ -18,6 +18,9 @@ public:
     lv_obj_t* obj() { return _screen; }
 
 private:
+    lv_obj_t* _apBtn = nullptr;
+    lv_obj_t* _apLabel = nullptr;
+    bool _lastAp = false;
     lv_obj_t* _screen      = nullptr;
     lv_obj_t* _switch      = nullptr;   // WiFi on/off
     lv_obj_t* _statusLabel = nullptr;   // Off / Connecting… / Connected: SSID  IP

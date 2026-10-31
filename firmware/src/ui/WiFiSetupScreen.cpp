@@ -1,4 +1,5 @@
 #include "WiFiSetupScreen.h"
+#include "../net/ConfigPortal.h"
 
 #include "theme.h"
 #include "UIManager.h"
@@ -163,6 +164,19 @@ void WiFiSetupScreen::create(lv_obj_t* parent) {
     lv_obj_center(rbl);
     lv_obj_add_flag(_rebootBtn, LV_OBJ_FLAG_HIDDEN);
 
+    _apBtn = lv_btn_create(cont);
+    lv_obj_set_width(_apBtn, LV_PCT(100));
+    _apLabel = lv_label_create(_apBtn);
+    lv_label_set_text(_apLabel, "Config-AP starten");
+    lv_obj_add_event_cb(_apBtn, [](lv_event_t* e) {
+        auto* self = static_cast<WiFiSetupScreen*>(lv_event_get_user_data(e));
+        auto& portal = ConfigPortal::instance();
+        if (portal.active()) portal.stop();
+        else if (!portal.start()) UIManager::instance().showToast("Config-AP nicht verfuegbar (SD/BLE/Berechtigung)");
+        self->clearList();
+        self->updateStatusUi();
+    }, LV_EVENT_CLICKED, this);
+
     // Scrollable network list (shown when not connected)
     _list = lv_obj_create(cont);
     lv_obj_set_size(_list, LV_PCT(100), LV_SIZE_CONTENT);
@@ -183,13 +197,15 @@ void WiFiSetupScreen::show() {
     lv_obj_clear_flag(_screen, LV_OBJ_FLAG_HIDDEN);
     _lastConnected = WiFiManager::instance().isConnected();
     updateStatusUi();
-    if (!WiFiManager::instance().isConnected()) rebuildList();
+    if (!WiFiManager::instance().isConnected() && !ConfigPortal::instance().active()) rebuildList();
     else clearList();
 }
 
 void WiFiSetupScreen::tick() {
     if (!_screen || lv_obj_has_flag(_screen, LV_OBJ_FLAG_HIDDEN)) return;
     if (_pwOverlay) return;                       // don't disturb password entry
+    bool ap = ConfigPortal::instance().active();
+    if (ap != _lastAp) { _lastAp = ap; updateStatusUi(); }
     bool c = WiFiManager::instance().isConnected();
     if (c != _lastConnected) {                    // connection state changed → refresh
         _lastConnected = c;
@@ -206,6 +222,7 @@ void WiFiSetupScreen::tick() {
 
 void WiFiSetupScreen::hide() {
     if (!_screen) return;
+    ConfigPortal::instance().stop(); // leave setup mode when returning to chat
     closePasswordEntry();
     lv_group_t* grp = UIManager::instance().inputGroup();
     if (grp) {
@@ -216,6 +233,7 @@ void WiFiSetupScreen::hide() {
         lv_group_remove_obj(_backBtn);
         lv_group_remove_obj(_switch);
         lv_group_remove_obj(_companionSwitch);
+        lv_group_remove_obj(_apBtn);
         lv_group_remove_obj(_checkBtn);
         lv_group_remove_obj(_rebootBtn);
     }
@@ -225,6 +243,27 @@ void WiFiSetupScreen::hide() {
 
 void WiFiSetupScreen::updateStatusUi() {
     auto& wm = WiFiManager::instance();
+    auto& portal = ConfigPortal::instance();
+    bool canAp = ConfigManager::instance().config().permissions.settings == "full" &&
+                 !CompanionService::instance().bleInited();
+    if (canAp) lv_obj_clear_state(_apBtn, LV_STATE_DISABLED);
+    else lv_obj_add_state(_apBtn, LV_STATE_DISABLED);
+    lv_label_set_text(_apLabel, portal.active() ? "Config-AP stoppen" : "Config-AP starten");
+    if (portal.active()) {
+        lv_label_set_long_mode(_statusLabel, LV_LABEL_LONG_WRAP);
+        lv_label_set_text(_statusLabel, (portal.ssid() + "\nPasswort: " + portal.password() +
+            "\nhttp://192.168.4.1 (10 Min.)").c_str());
+        lv_obj_add_state(_switch, LV_STATE_DISABLED);
+        lv_obj_add_state(_companionSwitch, LV_STATE_DISABLED);
+        lv_obj_add_state(_autoUpdateSwitch, LV_STATE_DISABLED);
+        lv_obj_add_flag(_checkBtn, LV_OBJ_FLAG_HIDDEN);
+        lv_group_t* g = UIManager::instance().inputGroup();
+        if (g) { lv_group_add_obj(g, _apBtn); lv_group_add_obj(g, _backBtn); }
+        return;
+    }
+    lv_label_set_long_mode(_statusLabel, LV_LABEL_LONG_DOT);
+    lv_obj_clear_state(_switch, LV_STATE_DISABLED);
+    lv_obj_clear_state(_autoUpdateSwitch, LV_STATE_DISABLED);
 
     // BLE was used this session → WiFi is unavailable until reboot (can't share
     // the radio/RAM with the BLE stack). Show that and disable the controls.
@@ -288,6 +327,7 @@ void WiFiSetupScreen::updateStatusUi() {
     if (grp) {
         // Order must match the on-screen order below the status label:
         // WiFi switch, companion row, auto-update row, "Check for updates".
+        lv_group_add_obj(grp, _apBtn);
         lv_group_add_obj(grp, _switch);
         if (connected) lv_group_add_obj(grp, _companionSwitch);
         // Always reachable — a stored preference, not a live-connection action.
@@ -308,6 +348,7 @@ void WiFiSetupScreen::clearList() {
 }
 
 void WiFiSetupScreen::rebuildList() {
+    if (ConfigPortal::instance().active()) return;
     clearList();
 
     // Never scan while the BLE stack is up — WiFi.scanNetworks() brings the WiFi
