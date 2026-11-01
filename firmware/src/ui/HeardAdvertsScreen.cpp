@@ -154,14 +154,23 @@ void HeardAdvertsScreen::create(lv_obj_t* parent) {
     lv_obj_set_style_text_font(title, FONT_HEADING, 0);
     lv_obj_set_style_text_color(title, theme::TEXT_PRIMARY(), 0);
 
-    // Icon buttons on the right: clear + advert
+    // Keep the title within the space left by the action buttons.
+    lv_obj_set_width(title, 0);
+    lv_obj_set_flex_grow(title, 1);
+    lv_label_set_long_mode(title, LV_LABEL_LONG_DOT);
+    lv_obj_set_style_pad_column(header, theme::PAD_SMALL, 0);
+
+    // Header actions use labels: lv_win_add_btn treats non-symbol strings as image paths.
     auto makeIconBtn = [this](const char* sym, lv_event_cb_t cb, void* user) {
-        lv_obj_t* btn = lv_win_add_btn(_screen, sym, theme::BTN_HEADER_ICON_W);
+        lv_obj_t* btn = lv_win_add_btn(_screen, nullptr, theme::BTN_HEADER_ICON_W);
         lv_obj_set_style_bg_opa(btn, LV_OPA_TRANSP, 0);
         lv_obj_set_style_shadow_width(btn, 0, 0);
         lv_obj_set_style_border_width(btn, 0, 0);
         lv_obj_add_event_cb(btn, cb, LV_EVENT_CLICKED, user);
-        lv_obj_t* lbl = lv_obj_get_child(btn, 0);
+        lv_obj_set_style_pad_all(btn, 0, 0);
+        lv_obj_t* lbl = lv_label_create(btn);
+        lv_label_set_text(lbl, sym);
+        lv_obj_center(lbl);
         lv_obj_set_style_text_font(lbl, FONT_HEADING, 0);
         lv_obj_set_style_text_color(lbl, theme::TEXT_PRIMARY(), 0);
         return btn;
