@@ -10,6 +10,7 @@ public:
     void create(lv_obj_t* parent);
     void show();
     void hide();
+    void showDetailForKey(const uint8_t* key);
     void tick();  // call from UIManager::update(); rebuilds when cache version changes
 
     lv_obj_t* obj() { return _screen; }
@@ -22,6 +23,7 @@ private:
     lv_obj_t* _clearBtn   = nullptr;
     lv_obj_t* _advertBtn  = nullptr;
     lv_obj_t* _localBtn   = nullptr;
+    lv_obj_t* _radarBtn   = nullptr;
 
     // Detail modal state — only one open at a time
     lv_obj_t* _detailMsgbox = nullptr;

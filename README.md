@@ -4,7 +4,7 @@
 
 # MCLite for T-Deck Plus & T-Watch Ultra
 
-**lexxi fork:** adds an on-demand, password-protected WiFi AP to upload `config.json` without removing the microSD. See [Config-AP setup and recovery](docs/config-ap.md). Hardware validation pending.
+**lexxi fork:** adds a password-protected [WiFi config upload](docs/config-ap.md), [German letter display/input](docs/latin-fonts.md), and a [heard-node radar](docs/radar.md). Config upload and T-Deck/T114 messaging are hardware-tested; the new radar still needs device validation.
 
 Lightweight off-grid communicator firmware for the LilyGo T-Deck Plus and T-Watch Ultra. Built on [MeshCore](https://github.com/ripplebiz/MeshCore), MCLite is purpose-built for emergency and outdoor communication -- no internet, no cell towers, no training needed. Turn it on and communicate.
 

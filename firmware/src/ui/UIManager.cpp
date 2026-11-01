@@ -62,6 +62,7 @@ bool UIManager::init() {
     _adminScreen.create(_mainScreen);
     _settingsScreen.create(_mainScreen);
     _heardAdvertsScreen.create(_mainScreen);
+    _radarScreen.create(_mainScreen);
     _wifiSetupScreen.create(_mainScreen);
     _usbSetupScreen.create(_mainScreen);
     _bleSetupScreen.create(_mainScreen);
@@ -280,6 +281,7 @@ void UIManager::update() {
     // Live updates for heard-adverts list and admin's heard-count row.
     // Both no-op cheaply when not visible / version unchanged.
     _heardAdvertsScreen.tick();
+    _radarScreen.tick();
     _adminScreen.tick();
     _settingsScreen.tick();  // live Heard-Adverts count on the Radio section
     _wifiSetupScreen.tick();
@@ -357,6 +359,13 @@ void UIManager::showSettings(SettingsSection s) {
     showScreen(Screen::DEVICE_SETTINGS);
 }
 
+void UIManager::showHeardAdvertDetails(const uint8_t* key) {
+    // showScreen hides every screen, so copy caller-owned storage first.
+    uint8_t copy[32]; memcpy(copy, key, sizeof copy);
+    showScreen(Screen::HEARD_ADVERTS);
+    _heardAdvertsScreen.showDetailForKey(copy);
+}
+
 void UIManager::showScreen(Screen screen) {
     // Central admin gate. Six routes reach Screen::ADMIN -- the '0' key, the
     // status-bar gear, the T-Watch PEK short-press, and the Back buttons in
@@ -380,6 +389,7 @@ void UIManager::showScreen(Screen screen) {
     _adminScreen.hide();
     _settingsScreen.hide();
     _heardAdvertsScreen.hide();
+    _radarScreen.hide();
     _wifiSetupScreen.hide();
     _usbSetupScreen.hide();
     _bleSetupScreen.hide();
@@ -400,6 +410,9 @@ void UIManager::showScreen(Screen screen) {
             break;
         case Screen::HEARD_ADVERTS:
             _heardAdvertsScreen.show();
+            break;
+        case Screen::RADAR:
+            _radarScreen.show();
             break;
         case Screen::WIFI_SETUP:
             _wifiSetupScreen.show();
@@ -1118,6 +1131,7 @@ void UIManager::showSetupScreen(SetupReason reason) {
     _chatScreen.hide();
     _adminScreen.hide();
     _heardAdvertsScreen.hide();
+    _radarScreen.hide();
     _wifiSetupScreen.hide();
     _usbSetupScreen.hide();
     _bleSetupScreen.hide();

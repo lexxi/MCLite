@@ -351,6 +351,13 @@ const DefaultString DEFAULT_STRINGS[] = {
 
     // Heard adverts
     {"heard_adverts_title", "Heard adverts"},
+    {"radar_geo_fmt", "Range %.1f km / %s"},
+    {"radar_cached", "last GPS"},
+    {"radar_hops", "Schematic: rings 0/1/2/3+ hops. No bearing."},
+    {"radar_nodes", "nodes"},
+    {"radar_no_fix", "No usable GPS position. Switch to Hops."},
+    {"radar_empty", "No matching adverts yet."},
+    {"radar_gone", "Node no longer in heard cache."},
     {"heard_adverts_empty", "No adverts heard yet"},
     {"heard_type_chat",     "Chat"},
     {"heard_type_repeater", "Repeater"},

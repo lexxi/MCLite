@@ -7,6 +7,7 @@
 #include "AdminScreen.h"
 #include "SettingsScreen.h"
 #include "HeardAdvertsScreen.h"
+#include "RadarScreen.h"
 #include "WiFiSetupScreen.h"
 #include "UsbSetupScreen.h"
 #include "BleSetupScreen.h"
@@ -21,6 +22,7 @@ enum class Screen {
     ADMIN,
     DEVICE_SETTINGS,
     HEARD_ADVERTS,
+    RADAR,
     WIFI_SETUP,
     USB_SETUP,
     BLE_SETUP
@@ -155,6 +157,9 @@ public:
     // Open the general map (own location + heard-node markers). From the GPS icon.
     void showGeneralMap();
 
+    // Resolve a heard node by key at navigation time (cache slots may be reused).
+    void showHeardAdvertDetails(const uint8_t* key);
+
     // Toggle Admin <-> home from the T-Deck status-bar gear (display.menu_button).
     // Re-checks admin_enabled / lock state / map here rather than trusting the
     // button's visibility, and defers the screen switch. See the .cpp for why.
@@ -191,6 +196,7 @@ private:
     AdminScreen         _adminScreen;
     SettingsScreen _settingsScreen;
     HeardAdvertsScreen  _heardAdvertsScreen;
+    RadarScreen         _radarScreen;
     WiFiSetupScreen     _wifiSetupScreen;
     UsbSetupScreen      _usbSetupScreen;
     BleSetupScreen      _bleSetupScreen;

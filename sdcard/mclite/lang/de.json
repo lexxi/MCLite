@@ -1,5 +1,5 @@
 {
-    "version": 61,
+    "version": 62,
     "no_sd_title": "Keine SD-Karte",
     "no_sd_msg": "SD-Karte mit config.json einlegen\nund neu starten.\n\nVerwenden Sie das MCLite Config Tool\num Ihre Konfiguration zu erstellen.",
     "setup_title": "Einrichtung erforderlich",
@@ -347,5 +347,12 @@
     "canned_add_msg": "Nachricht hinzufuegen",
     "canned_enter_msg": "Nachrichtentext",
     "canned_msg_empty": "Nachricht darf nicht leer sein",
-    "canned_uses_global": "Globale Liste wird verwendet"
+    "canned_uses_global": "Globale Liste wird verwendet",
+    "radar_geo_fmt": "Rand %.1f km / %s",
+    "radar_cached": "letztes GPS",
+    "radar_hops": "Schema: Ringe 0/1/2/3+ Hops. Keine Richtung.",
+    "radar_nodes": "Knoten",
+    "radar_no_fix": "Keine nutzbare GPS-Position. Auf Hops wechseln.",
+    "radar_empty": "Noch keine passenden Adverts.",
+    "radar_gone": "Knoten nicht mehr im Empfangsspeicher."
 }

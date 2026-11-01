@@ -167,6 +167,11 @@ void HeardAdvertsScreen::create(lv_obj_t* parent) {
         return btn;
     };
 
+    _radarBtn = makeIconBtn("Radar", [](lv_event_t*) {
+        UIManager::swallowTouchUntilRelease();
+        lv_async_call([](void*) { UIManager::instance().showScreen(Screen::RADAR); }, nullptr);
+    }, this);
+    lv_obj_set_width(_radarBtn, 48);
     _clearBtn  = makeIconBtn(LV_SYMBOL_TRASH,  clearBtnCb,  this);
     _advertBtn = makeIconBtn(LV_SYMBOL_UPLOAD, advertBtnCb, this);  // flood (mesh-wide)
     _localBtn  = makeIconBtn(LV_SYMBOL_HOME,   localBtnCb,  this);  // zero-hop (neighbours)
@@ -243,6 +248,7 @@ void HeardAdvertsScreen::hide() {
         lv_group_remove_obj(_localBtn);
         lv_group_remove_obj(_clearBtn);
         lv_group_remove_obj(_backBtn);
+        lv_group_remove_obj(_radarBtn);
     }
 
     lv_obj_add_flag(_screen, LV_OBJ_FLAG_HIDDEN);
@@ -288,6 +294,7 @@ void HeardAdvertsScreen::rebuild() {
         lv_group_remove_obj(_localBtn);
         lv_group_remove_obj(_clearBtn);
         lv_group_remove_obj(_backBtn);
+        lv_group_remove_obj(_radarBtn);
     }
     // Clear any stale visual state. PRESSED can persist if a click handler
     // ran a screen transition before LVGL dispatched the release event;
@@ -296,6 +303,7 @@ void HeardAdvertsScreen::rebuild() {
     lv_obj_clear_state(_localBtn, LV_STATE_FOCUSED | LV_STATE_PRESSED);
     lv_obj_clear_state(_clearBtn, LV_STATE_FOCUSED | LV_STATE_PRESSED);
     lv_obj_clear_state(_backBtn, LV_STATE_FOCUSED | LV_STATE_PRESSED);
+    lv_obj_clear_state(_radarBtn, LV_STATE_FOCUSED | LV_STATE_PRESSED);
     lv_obj_clean(_list);
 
     int n = cache.count();
@@ -303,6 +311,7 @@ void HeardAdvertsScreen::rebuild() {
         lv_obj_clear_flag(_emptyHint, LV_OBJ_FLAG_HIDDEN);
         lv_obj_add_flag(_clearBtn, LV_OBJ_FLAG_HIDDEN);  // nothing to clear
         if (grp) {
+            lv_group_add_obj(grp, _radarBtn);
             lv_group_add_obj(grp, _backBtn);
             lv_group_add_obj(grp, _advertBtn);
             lv_group_add_obj(grp, _localBtn);
@@ -450,6 +459,7 @@ void HeardAdvertsScreen::rebuild() {
     // node has GPS) → back → clear → advert → local → back to the row buttons.
     // The row containers themselves aren't group members; the buttons are.
     if (grp) {
+        lv_group_add_obj(grp, _radarBtn);
         lv_group_add_obj(grp, _backBtn);
         lv_group_add_obj(grp, _clearBtn);
         lv_group_add_obj(grp, _advertBtn);
@@ -507,6 +517,15 @@ void HeardAdvertsScreen::tick() {
     _lastVersion   = v;
     _lastRebuildMs = now;
     rebuild();
+}
+
+void HeardAdvertsScreen::showDetailForKey(const uint8_t* key) {
+    auto& cache = HeardAdvertCache::instance();
+    for (int i = 0; i < cache.count(); ++i) {
+        if (!memcmp(key, cache.entries()[i].pubKey, 32)) { openDetail(i); return; }
+    }
+    // The cache can evict an entry between a tap and deferred navigation.
+    UIManager::instance().showToast(t("radar_gone"));
 }
 
 void HeardAdvertsScreen::openDetail(int slotIdx) {
