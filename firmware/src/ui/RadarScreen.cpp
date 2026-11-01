@@ -136,8 +136,8 @@ void RadarScreen::refresh() {
         auto& d=_dots[i]; const auto* n=findNode(d.key);
         // Linear geographic range; every ring is a quarter of the shown range.
         const double radius=_geo ? _radius*d.km/_rangeKm : _radius*radar::hopRadius(n->hops);
-        d.x=_cx+(int16_t)std::lround(radius*std::sin(d.bearing*radar::PI/180));
-        d.y=_cy-(int16_t)std::lround(radius*std::cos(d.bearing*radar::PI/180));
+        d.x=_cx+(int16_t)std::lround(radius*std::sin(d.bearing*radar::kPi/180));
+        d.y=_cy-(int16_t)std::lround(radius*std::cos(d.bearing*radar::kPi/180));
         if(hadSelection && !memcmp(selected,d.key,32)) _selected=i;
     }
     lv_label_set_text(_modeLabel,_geo ? "Geo / N" : "Hops");

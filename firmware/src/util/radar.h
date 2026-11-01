@@ -3,20 +3,20 @@
 #include <cstdint>
 
 namespace mclite { namespace radar {
-constexpr double PI = 3.14159265358979323846;
+constexpr double kPi = 3.14159265358979323846;
 inline bool validPosition(double lat, double lon) {
     return std::isfinite(lat) && std::isfinite(lon) &&
            lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
 }
 inline double distanceKm(double a, double b, double c, double d) {
-    const double r = PI / 180;
+    const double r = kPi / 180;
     const double x = std::sin((c-a)*r/2), y = std::sin((d-b)*r/2);
     double h = x*x + std::cos(a*r)*std::cos(c*r)*y*y;
     h = h < 0 ? 0 : h > 1 ? 1 : h;
     return 6371.0088 * 2 * std::atan2(std::sqrt(h), std::sqrt(1-h));
 }
 inline double bearingDeg(double a, double b, double c, double d) {
-    const double r = PI / 180;
+    const double r = kPi / 180;
     const double y = std::sin((d-b)*r)*std::cos(c*r);
     const double x = std::cos(a*r)*std::sin(c*r)-std::sin(a*r)*std::cos(c*r)*std::cos((d-b)*r);
     double v = std::atan2(y,x)/r;
