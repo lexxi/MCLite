@@ -49,3 +49,10 @@ MCLite uses the following open-source libraries. Their license terms apply to th
   generated output is reproducible offline. That directory is redistributed OpenMoji artwork, under the same
   CC-BY-SA 4.0 terms.
 - MCLite itself is released under the **MIT License**. See [LICENSE](LICENSE).
+
+## Montserrat Latin-1 supplements
+
+The generated `firmware/src/ui/fonts/latin_font_*.c` files derive from
+[Montserrat](https://github.com/google/fonts/tree/main/ofl/montserrat),
+licensed under the SIL Open Font License 1.1. The full copyright and license
+are in `firmware/assets/fonts/Montserrat-OFL.txt`.

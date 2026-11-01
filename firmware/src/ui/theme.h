@@ -5,13 +5,21 @@
 #include "../hal/boards/board.h"
 
 // Generated OpenMoji emoji fonts (src/ui/fonts/, board-gated). Each carries a
-// Montserrat `.fallback`, so assigning one to a label renders emoji from it and
+// Latin-1 / Montserrat `.fallback`, so assigning one to a label renders emoji from it and
 // all ASCII from Montserrat (visually identical). T-Deck links 12/14, T-Watch
 // 16/20 — the declarations for the other board's sizes are unreferenced externs.
 LV_FONT_DECLARE(lv_font_emoji_12)
 LV_FONT_DECLARE(lv_font_emoji_14)
 LV_FONT_DECLARE(lv_font_emoji_16)
 LV_FONT_DECLARE(lv_font_emoji_20)
+
+// Latin-1 supplement (including German umlauts); falls back to stock Montserrat.
+LV_FONT_DECLARE(lv_font_latin_12)
+LV_FONT_DECLARE(lv_font_latin_14)
+LV_FONT_DECLARE(lv_font_latin_16)
+LV_FONT_DECLARE(lv_font_latin_20)
+LV_FONT_DECLARE(lv_font_latin_24)
+LV_FONT_DECLARE(lv_font_latin_28)
 
 // Icon aliases — simple text characters that always render correctly
 #define ICON_DM       "@"                  // DM contact
@@ -293,8 +301,8 @@ constexpr int CONVO_ROW_HEIGHT  = 48;
 
 // Body/heading fonts are resolved at runtime so colour emoji can be swapped in.
 // The colour font is an lv_imgfont whose fallback is the existing monochrome
-// emoji font (which in turn falls back to Montserrat), so the chain is
-//   colour subset -> mono emoji -> ASCII
+// emoji font (then Latin-1 and stock Montserrat), so the chain is
+//   colour subset -> mono emoji -> Latin-1 -> ASCII
 // and anything outside the baked set still renders exactly as before. Returns
 // the mono font directly when display.color_emoji is off or creation failed.
 #ifdef PLATFORM_TWATCH
@@ -310,11 +318,11 @@ void initColorEmoji();     // called once after config load (main.cpp, only when
 // Fonts — T-Watch bumps every level up by 2-4pt so labels are readable at
 // arm's length. T-Deck unchanged.
 #ifdef PLATFORM_TWATCH
-#define FONT_SMALL          &lv_font_montserrat_14
-#define FONT_NORMAL         &lv_font_montserrat_16
-#define FONT_LARGE          &lv_font_montserrat_20
-#define FONT_TITLE          &lv_font_montserrat_24
-#define FONT_STATUSBAR_ICON &lv_font_montserrat_28  // 2x current icon size for finger taps
+#define FONT_SMALL          &lv_font_latin_14
+#define FONT_NORMAL         &lv_font_latin_16
+#define FONT_LARGE          &lv_font_latin_20
+#define FONT_TITLE          &lv_font_latin_24
+#define FONT_STATUSBAR_ICON &lv_font_latin_28  // 2x current icon size for finger taps
 // Semantic fonts — one step larger than the size-named FONT_* on T-Watch so body
 // text and section headings read comfortably at arm's length. Emoji fonts are
 // primary here; they fall back to Montserrat for ASCII (--lv-fallback), so emoji
@@ -322,10 +330,10 @@ void initColorEmoji();     // called once after config load (main.cpp, only when
 #define FONT_BODY     mclite::theme::fontBody()     // colour-emoji font when enabled, else mono
 #define FONT_HEADING  mclite::theme::fontHeading()
 #else
-#define FONT_SMALL    &lv_font_montserrat_12
-#define FONT_NORMAL   &lv_font_montserrat_14
-#define FONT_LARGE    &lv_font_montserrat_16
-#define FONT_TITLE    &lv_font_montserrat_20
+#define FONT_SMALL    &lv_font_latin_12
+#define FONT_NORMAL   &lv_font_latin_14
+#define FONT_LARGE    &lv_font_latin_16
+#define FONT_TITLE    &lv_font_latin_20
 #define FONT_BODY     mclite::theme::fontBody()     // colour-emoji font when enabled, else mono
 #define FONT_HEADING  mclite::theme::fontHeading()
 #endif

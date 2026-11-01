@@ -23,7 +23,7 @@ for SIZE in 12 14 16 20; do
     --font "$FONT" "${RANGES[@]}" \
     --size "$SIZE" --bpp 1 --format lvgl \
     --lv-font-name "lv_font_emoji_${SIZE}" \
-    --lv-fallback "lv_font_montserrat_${SIZE}" \
+    --lv-fallback "lv_font_latin_${SIZE}" \
     -o "${OUT}/emoji_font_${SIZE}.c"
 done
 echo "Done. Re-add the per-board #ifdef guards (PLATFORM_TDECK for 12/14, PLATFORM_TWATCH for 16/20)."
