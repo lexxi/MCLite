@@ -3,7 +3,7 @@
 Fork addition: `0.4.6-ap.1`.
 
 1. Insert the microSD and boot the T-Deck Plus.
-2. Open Admin → WiFi → **Config-AP starten**. Full settings permission is required.
+2. Open **Sym + 0 → Device Info → WiFi Companion → Start config AP** and select menu entries by touchscreen (labels depend on language). Full settings permission is required.
 3. Connect your computer/phone to the displayed `MCLite-Config-…` network using the displayed random password. Stay connected even if the OS reports no internet.
 4. Open **http://192.168.4.1** and select the `config.json` exported by the config tool. Upload the JSON itself, not the ZIP.
 5. Confirm **Prüfen und übernehmen**. On success the device restarts automatically.
@@ -18,6 +18,6 @@ The previous file is kept as `/config.pre-upload.json`. The new file is written 
 
 ## Validation
 
-Native ConfigManager tests cover identity preservation, backup, unchanged live config until reboot, blocked stale saves/re-import, malformed input, invalid keys, and missing storage. Hardware tests still required: join the AP, upload from desktop/iOS, reject corrupt/oversize files, reboot persistence, timeout and stop, and BLE-to-WiFi reboot behaviour.
+Native ConfigManager tests cover identity preservation, backup, unchanged live config until reboot, blocked stale saves/re-import, malformed input, invalid keys, and missing storage. The user has successfully joined the AP and uploaded a configuration on the T-Deck Plus. Hardware confirmation is still outstanding for the remaining edge cases: corrupt/oversize files, timeout and stop, and BLE-to-WiFi reboot behaviour.
 
 Build: `pio run -d firmware -e tdeck_plus`. This fork checks OTA releases in `lexxi/MCLite` to avoid replacing the custom firmware with upstream firmware.

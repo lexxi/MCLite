@@ -14,7 +14,7 @@ unbacked-up data. Keep USB power connected while formatting.
 ```powershell
 Set-Location C:\pyprojects\MCLite
 git fetch origin
-git switch feature/sd-maintenance
+git switch main
 git pull --ff-only
 .\.venv\Scripts\Activate.ps1
 python -m platformio run -d tools/sd-maintenance -e tdeck_sd_maintenance
@@ -48,15 +48,16 @@ Power-cycle normally, without pressing trackball.
    not create config.json. MCLite should create its default config on the FAT32
    card, after which Admin → WiFi → Config-AP provides config upload.
 
-To restore the application from the existing successful build:
+To rebuild and restore the current application from `main`:
 
 ```powershell
-python -m esptool --chip esp32s3 --port COM10 --baud 460800 write_flash 0x0 .\firmware\.pio\build\tdeck_plus\mclite-v0.4.6-ap.1.bin
+python -m platformio run -d firmware -e tdeck_plus -t upload
 ```
 
-This path assumes that exact previously built file exists. Otherwise rebuild
-MCLite with `python -m platformio run -d firmware -e tdeck_plus` and use the
-resulting merged `mclite-*.bin`. Never flash the unmerged firmware.bin at 0x0.
+If necessary add the current port, for example `--upload-port COM10`. This
+uses PlatformIO's normal firmware upload layout. When flashing a merged image
+manually instead, use the actual versioned `mclite-*.bin` at offset 0x0;
+never flash the unmerged firmware.bin at 0x0.
 
 ## Design / validation limits
 
@@ -66,5 +67,6 @@ FatFormatter. The formatter generates the MBR, FAT32 boot sectors, FATs and root
 directory; partition size is slightly below 16 GiB because of alignment/metadata.
 The filesystem test mounts the physical card without the size adapter.
 
-No physical T-Deck/card test has been performed here. A successful compile alone
-does not establish compatibility of the particular 64 GB card with MCLite.
+The user successfully prepared the inserted 64 GB card on the T-Deck Plus,
+then reflashed MCLite and used the card. This confirms that particular setup;
+other card models and capacities have not been established by that test.
