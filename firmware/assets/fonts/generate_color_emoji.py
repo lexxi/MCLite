@@ -50,7 +50,11 @@ def codepoints_from_source():
         for esc in re.findall(r'"((?:\\x[0-9A-Fa-f]{2})+)"', blk):
             raw = bytes(int(x, 16) for x in re.findall(r"\\x([0-9A-Fa-f]{2})", esc))
             try:
-                out.add(ord(raw.decode("utf-8")))
+                cp = ord(raw.decode("utf-8"))
+                # Latin letters in the shared picker use the text font fallback,
+                # not OpenMoji image assets.
+                if cp >= 0x2600:
+                    out.add(cp)
             except (UnicodeDecodeError, TypeError):
                 # A multi-codepoint sequence (an emoji carrying U+FE0F, a skin-tone
                 # modifier, a ZWJ pair) cannot be baked as a single glyph. Say so

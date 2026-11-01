@@ -1152,9 +1152,11 @@ void ChatScreen::emojiBtnCb(lv_event_t* e) {
 }
 
 void ChatScreen::showEmojiPicker() {
-    // 6-wide grid of UTF-8 emoji (static so the btnmatrix can retain the pointers).
+    // German letters first, followed by the 6-wide UTF-8 emoji grid.
+    // Static storage: the btnmatrix retains these pointers.
     // 🙂🙃🙁😎😐😶 / 😴🤬😡🤡👽👀 / 🖕👍👎🧭💯💗 / 🍽🍔🍺🎉💩🔥 / ☂🌥🌧❄☀🌜
     static const char* emojiMap[] = {
+        "\xC3\xA4", "\xC3\xB6", "\xC3\xBC", "\xC3\x84", "\xC3\x96", "\xC3\x9C", "\xC3\x9F", "\n",
         "\xF0\x9F\x99\x82", "\xF0\x9F\x99\x83", "\xF0\x9F\x99\x81", "\xF0\x9F\x98\x8E", "\xF0\x9F\x98\x90", "\xF0\x9F\x98\xB6", "\n",
         "\xF0\x9F\x98\xB4", "\xF0\x9F\xA4\xAC", "\xF0\x9F\x98\xA1", "\xF0\x9F\xA4\xA1", "\xF0\x9F\x91\xBD", "\xF0\x9F\x91\x80", "\n",
         "\xF0\x9F\x96\x95", "\xF0\x9F\x91\x8D", "\xF0\x9F\x91\x8E", "\xF0\x9F\xA7\xAD", "\xF0\x9F\x92\xAF", "\xF0\x9F\x92\x97", "\n",
@@ -1174,9 +1176,9 @@ void ChatScreen::showEmojiPicker() {
     _emojiBtnm = lv_btnmatrix_create(_screen);
     lv_btnmatrix_set_map(_emojiBtnm, emojiMap);
 #ifdef PLATFORM_TWATCH
-    lv_coord_t pickerH = 5 * 56 + 16;  // 5 rows, 56 px each for finger taps
+    lv_coord_t pickerH = 6 * 52 + 16;  // 6 rows, including the German letters
 #else
-    lv_coord_t pickerH = 5 * 32 + 8;
+    lv_coord_t pickerH = 6 * 28 + 8;  // fits the T-Deck content area
 #endif
     lv_obj_set_size(_emojiBtnm, theme::MODAL_TEXT_WIDTH, pickerH);
     lv_obj_align(_emojiBtnm, LV_ALIGN_CENTER, 0, 0);
