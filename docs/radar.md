@@ -1,6 +1,7 @@
 # Heard-node radar (0.4.6-ap.4)
 
-Open **Device Info -> Heard Adverts -> Radar**. The radar uses the same bounded
+Open **Settings -> Radio -> Heard adverts -> Radar** (tap the header button).
+The Radar button is available even when the heard list is empty. The radar uses the same bounded
 64-node RAM cache as Heard Adverts, including nodes not saved as contacts. It
 listens passively; opening it does not send discovery requests or other packets.
 The cache is lost on reboot and fills as advertisements arrive.
@@ -33,6 +34,13 @@ strings fall back to English when existing SD language files are older. Updated
 German/French/Italian files are in `sdcard/mclite/lang/` and in the Config Tool.
 The radar is an independent implementation using existing MCLite/LVGL APIs;
 no Wadamesh source was copied into this MIT-licensed fork.
+
+## Confirmed device status (2026-11-02)
+
+Reception of additional mesh participants and the radar display have been
+confirmed on the T-Deck Plus after the header-button fix. Point details and
+geographic placement with GPS remain to be confirmed. The Radar action now
+uses a text label; LVGL previously interpreted its caption as an image filename.
 
 ## Validation
 
