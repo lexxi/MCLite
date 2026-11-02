@@ -1,6 +1,7 @@
 #pragma once
 #include <Arduino.h>
 #include <WebServer.h>
+#include <SD.h>
 
 namespace mclite {
 // On-demand local configuration service. All handlers run on the main loop.
@@ -21,6 +22,14 @@ private:
     bool _uploadOk = false;
     String _ssid, _password, _token, _upload, _error;
     uint32_t _startedAt = 0, _restartAt = 0;
+    File _tileFile;
+    String _tilePath, _tileError;
+    size_t _tileBytes = 0;
+    uint8_t _tileHeader[24] = {};
+    bool _tileOk = false, _tileExists = false;
+    void tileUpload();
+    void tileFinish();
+    void tileCleanup();
     void page();
     void upload();
     void finish();
