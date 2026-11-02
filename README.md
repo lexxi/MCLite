@@ -12,7 +12,8 @@ Dieser Fork basiert auf [laserir/MCLite](https://github.com/laserir/MCLite), ein
 | SD-Wartungsfirmware | Eingelegte große SD-Karte direkt am Gerät für MCLite vorbereiten | Mit unserer 64-GB-Karte und einem 16-GiB-FAT32-Bereich erfolgreich getestet |
 | Umlaute anzeigen | Latin-1-Schrift für `ä ö ü Ä Ö Ü ß` und weitere Zeichen | Empfang und Anzeige bestätigt |
 | Umlaute schreiben | Erste Reihe der Emoji-Auswahl enthält `ä ö ü Ä Ö Ü ß` | Implementiert; Bestätigung am Gerät noch offen |
-| Radar | Gehörte Knoten nach Hops oder geografischer Position anzeigen | Implementiert; Gerätetest noch offen |
+| Radar | Gehörte Knoten nach Hops oder geografischer Position anzeigen | Empfang weiterer Teilnehmer und Radar-Anzeige bestätigt; Geo und Details noch offen |
+| WLAN-Karten-Upload | PNG-Kachelordner im Config-AP auf SD übertragen | Implementiert; vollständiger Transfer und Kartenanzeige noch offen |
 
 Zusätzlich bestätigt: **T-Deck Plus ↔ T114**, Nachrichten im Kanal **`#kf`** in beide Richtungen.
 
@@ -56,6 +57,11 @@ Falls die automatische Erkennung scheitert, den aktuellen Port ergänzen, beispi
 
 Die erste Einrichtung lädt Toolchain und Bibliotheken herunter. Spätere Builds verwenden den lokalen Cache.
 
+Die lokale `.venv` ist über `.gitignore` ausgeschlossen. Der Pre-Commit-Hook erkennt
+PlatformIO aus PATH bzw. `python -m platformio` sowie Windows-/Unix-Installationspfaden.
+Nur vorgemerkte Firmwareänderungen lösen native Tests aus; reine Dokumentations-
+und `.gitignore`-Änderungen benötigen keinen Firmwaretest.
+
 **Wichtig:** Der Webflasher unter `laserir.github.io` installiert Upstream-Firmware. Er enthält unsere Erweiterungen nicht. Auch die geerbten Webflasher-Dateien und alten Binärdateien in diesem Repository sind kein Ersatz für einen aktuellen Fork-Build.
 
 ## Konfiguration über WLAN hochladen
@@ -73,6 +79,11 @@ Zum Bearbeiten den [Config-Editor dieses Forks](tools/config-tool/mclite_config_
 Details, Voraussetzungen und Wiederherstellung: [Config-AP](docs/config-ap.md).
 
 ## Offline-Karten über WLAN übertragen
+
+[Karten für Kärnten und Umgebung erstellen](docs/offline-maps.md): Geofabrik-Rohdaten,
+lokaler Ausschnitt und QGIS 3.40. Download abgeschlossen; lokaler Extract läuft.
+Gestaltung, Export und Kartenanzeige sind noch in Arbeit.
+
 
 Im selben Config-AP unter http://192.168.4.1 steht **Offline-Karten** zur Verfügung.
 Am Computer in Chrome oder Edge den entpackten `tiles`-Ordner auswählen und
@@ -107,7 +118,7 @@ Die Auswahl setzt `display.emoji = true` voraus. Details: [Schriften und Zeichen
 
 ## Radar öffnen
 
-**Device Info → Heard Adverts → Radar**
+**Einstellungen → Radio → Heard adverts → Radar** (Button in der Kopfzeile, auch bei leerer Liste).
 
 - **Hops:** alle gespeicherten gehörten Knoten. Die Ringe stehen für 0, 1, 2 und 3+ Hops. Die Winkel sind schematisch; sie zeigen keine gemessene Richtung.
 - **Geo / N:** Richtung und Entfernung werden aus den Koordinaten des eigenen Geräts und des jeweiligen Knotens berechnet. Norden bleibt oben. Knoten ohne ausreichende Positionsdaten werden hier ausgelassen.
@@ -138,6 +149,7 @@ Builds, Flashen und Gerätetests erfolgen in der lokalen PlatformIO-Umgebung. Ei
 - [Config-AP](docs/config-ap.md)
 - [Umlaute und Zeichenauswahl](docs/latin-fonts.md)
 - [Radar](docs/radar.md)
+- [Offline-Karten erstellen und übertragen](docs/offline-maps.md)
 - [SD-Wartungsfirmware](tools/sd-maintenance/README.md)
 - [Bisherige ausführliche Anleitung mit Upstream-Funktionen](docs/upstream/README.md)
 - [Geerbtes Upstream-Changelog](CHANGELOG.md)
