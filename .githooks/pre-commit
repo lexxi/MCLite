@@ -1,12 +1,27 @@
 #!/bin/bash
-# Pre-commit hook: run native unit tests before allowing a commit.
-# Bypass with: git commit --no-verify
+# Run native tests for staged firmware changes. Bypass: git -c core.hooksPath=/dev/null commit ...
+set -e
 
-echo "Running unit tests..."
-cd firmware && ~/.platformio/penv/bin/pio test -e native_test 2>&1
+# Documentation and local ignore rules do not require firmware tests.
+if ! git diff --cached --name-only --diff-filter=ACMRD | grep -q '^firmware/'; then
+    exit 0
+fi
 
-if [ $? -ne 0 ]; then
-    echo ""
-    echo "Tests failed — commit blocked. Fix the failures and try again."
+if command -v pio >/dev/null 2>&1; then
+    pio_cmd=(pio)
+elif command -v python >/dev/null 2>&1 && python -m platformio --version >/dev/null 2>&1; then
+    pio_cmd=(python -m platformio)
+elif [ -x "$HOME/.platformio/penv/Scripts/pio.exe" ]; then
+    pio_cmd=("$HOME/.platformio/penv/Scripts/pio.exe")
+elif [ -x "$HOME/.platformio/penv/bin/pio" ]; then
+    pio_cmd=("$HOME/.platformio/penv/bin/pio")
+else
+    echo "PlatformIO not found. Activate the project .venv and retry."
+    exit 1
+fi
+
+echo "Running native unit tests..."
+if ! "${pio_cmd[@]}" test -d firmware -e native_test; then
+    echo "Native tests failed; commit blocked."
     exit 1
 fi
