@@ -13,7 +13,7 @@ Dieser Fork basiert auf [laserir/MCLite](https://github.com/laserir/MCLite), ein
 | Umlaute anzeigen | Latin-1-Schrift für `ä ö ü Ä Ö Ü ß` und weitere Zeichen | Empfang und Anzeige bestätigt |
 | Umlaute schreiben | Erste Reihe der Emoji-Auswahl enthält `ä ö ü Ä Ö Ü ß` | Implementiert; Bestätigung am Gerät noch offen |
 | Radar | Gehörte Knoten nach Hops oder geografischer Position anzeigen | Empfang weiterer Teilnehmer und Radar-Anzeige bestätigt; Geo und Details noch offen |
-| WLAN-Karten-Upload | PNG-Kachelordner im Config-AP auf SD übertragen | Implementiert; vollständiger Transfer und Kartenanzeige noch offen |
+| WLAN-Karten-Upload | PNG-Kachelordner im Config-AP auf SD übertragen | Villach-Test: Upload, Kartenanzeige und Zoom 12 ↔ 13 am Gerät bestätigt |
 
 Zusätzlich bestätigt: **T-Deck Plus ↔ T114**, Nachrichten im Kanal **`#kf`** in beide Richtungen.
 
@@ -81,8 +81,10 @@ Details, Voraussetzungen und Wiederherstellung: [Config-AP](docs/config-ap.md).
 ## Offline-Karten über WLAN übertragen
 
 [Karten für Kärnten und Umgebung erstellen](docs/offline-maps.md): Geofabrik-Rohdaten,
-lokaler Ausschnitt und QGIS 3.40. Download abgeschlossen; lokaler Extract läuft.
-Gestaltung, Export und Kartenanzeige sind noch in Arbeit.
+lokaler Ausschnitt, GeoPackage, automatische Gestaltung und QGIS 3.40.
+Die Anleitung enthält kopierbare Befehle für den Villach-Test und das Gesamtgebiet
+in Zoom 8–13 sowie Upload und Bedienung am Gerät. Villach-Test erfolgreich;
+der vollständige Gesamtgebiet-Transfer ist noch nicht bestätigt.
 
 
 Im selben Config-AP unter http://192.168.4.1 steht **Offline-Karten** zur Verfügung.
@@ -108,7 +110,8 @@ schaltet er ab. Nach Abschluss das T-Deck neu starten und die Kartenansicht
 über das GPS-Symbol öffnen. Konfiguration und Nachrichten bleiben erhalten.
 Die bestehende 16-GiB-FAT32-Partition reicht als Speicherort; keine Neuformatierung nötig.
 
-Implementiert; Build und Gerätetest dieses Karten-Uploads stehen noch aus.
+Mit dem Villach-Testsatz am Gerät bestätigt: WLAN-Upload, Anzeige nach Neustart
+und Zoomwechsel 12 ↔ 13. Der Gesamtgebiet-Transfer ist noch offen.
 
 ## Umlaute schreiben
 
