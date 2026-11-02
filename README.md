@@ -2,7 +2,7 @@
 
 Dieser Fork basiert auf [laserir/MCLite](https://github.com/laserir/MCLite), einer eigenständig bedienbaren MeshCore-Firmware. Unser Schwerpunkt ist der **LilyGo T-Deck Plus**: Nachrichten über Tastatur und Touchscreen schreiben, Konfiguration ohne Kartenleser übertragen und gehörte Mesh-Knoten anzeigen.
 
-**Aktueller Firmwarestand: `0.4.6-ap.4`**, einschließlich der Korrektur des Arduino-`PI`-Namenskonflikts.
+**Aktueller Firmwarestand: `0.4.6-ap.5`**, einschließlich der Korrektur des Arduino-`PI`-Namenskonflikts.
 
 ## Unsere Erweiterungen
 
@@ -71,6 +71,33 @@ Die SD-Karte bleibt dabei eingebaut. Die bisherige Konfiguration wird als `/conf
 Zum Bearbeiten den [Config-Editor dieses Forks](tools/config-tool/mclite_config_tool.html) lokal im Browser öffnen. Beim Export das ZIP entpacken und die **JSON-Datei** hochladen.
 
 Details, Voraussetzungen und Wiederherstellung: [Config-AP](docs/config-ap.md).
+
+## Offline-Karten über WLAN übertragen
+
+Im selben Config-AP unter http://192.168.4.1 steht **Offline-Karten** zur Verfügung.
+Am Computer in Chrome oder Edge den entpackten `tiles`-Ordner auswählen und
+**Karten übertragen** anklicken. ZIP-Dateien werden nicht entpackt.
+
+Erwartet wird `tiles/<Zoom>/<X>/<Y>.png`: 256×256-PNG-Kacheln,
+Web Mercator (EPSG:3857), Zoom 0 bis 19, maximal 1 MiB pro Kachel.
+Das Kartenmaterial muss vorher passend bereitgestellt werden; die Firmware
+lädt selbst keine Karten aus dem Internet herunter.
+
+Kacheln werden einzeln direkt auf die SD geschrieben. Vorhandene Dateien
+werden übersprungen; erneute Auswahl desselben Ordners setzt einen abgebrochenen
+Transfer damit fort. Fehlerhafte vorhandene Kacheln müssen vor einer erneuten
+Übertragung entfernt werden. Der Fortschritt zeigt übertragene und vorhandene
+Kacheln. **Nach dieser Kachel stoppen** beendet den Transfer nach der laufenden Datei.
+Eine unvollständige neue Datei wird nicht als fertige Kachel übernommen.
+Signatur, IHDR-Abmessungen und Dateigröße werden geprüft; das ersetzt keine
+vollständige PNG-Dekodierung oder CRC-Prüfung.
+
+Während des Uploads bleibt der AP aktiv; nach zehn Minuten ohne Aktivität
+schaltet er ab. Nach Abschluss das T-Deck neu starten und die Kartenansicht
+über das GPS-Symbol öffnen. Konfiguration und Nachrichten bleiben erhalten.
+Die bestehende 16-GiB-FAT32-Partition reicht als Speicherort; keine Neuformatierung nötig.
+
+Implementiert; Build und Gerätetest dieses Karten-Uploads stehen noch aus.
 
 ## Umlaute schreiben
 
