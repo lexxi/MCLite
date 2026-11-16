@@ -7,6 +7,7 @@
 #include "../util/Utf8Trim.h"
 #include "../util/ReactionParse.h"
 #include "../mesh/MeshManager.h"
+#include "../mesh/MCLiteMesh.h"
 #include "../mesh/ContactStore.h"
 #include "../mesh/ChannelStore.h"
 #include "../hal/Display.h"
