@@ -1,4 +1,5 @@
 #include "MeshManager.h"
+#include "../util/AirViewData.h"
 #include "util/log.h"
 #include "MCLiteMesh.h"
 #include "ContactStore.h"
@@ -73,6 +74,9 @@ bool MeshManager::initRadio() {
     radio.setBandwidth(bw);
     radio.setCodingRate(cr);
     radio.setOutputPower(cfg.radio.txPower);
+    auto& air = AirViewData::instance();
+    air.radio.frequency = freq; air.radio.bandwidth = bw;
+    air.radio.sf = sf; air.radio.cr = cr; air.radio.power = cfg.radio.txPower;
 
     LOGLN("[Mesh] SX1262 ready");
     _radioReady = true;
@@ -301,6 +305,15 @@ void MeshManager::update() {
 
     // Process radio I/O, incoming packets, ACK timeouts
     _mesh->loop();
+
+    // Read-only instantaneous RSSI, on the main loop/shared SPI bus. Do not use
+    // CAD, retune, change receive state, or read packet RSSI as the live level.
+    auto& air = AirViewData::instance();
+    const uint32_t sampleTime = millis();
+    if (air.sampleDue(sampleTime)) {
+        const bool receiving = _mesh->radioInReceiveMode();
+        air.sample(sampleTime, receiving, receiving ? radio.getRSSI(false) : 0);
+    }
 
     // Adverts. One flood advert on boot so repeaters/peers can learn a return
     // path to us. Periodic re-adverts are OFF by default — a periodic flood timer

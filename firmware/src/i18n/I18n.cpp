@@ -9,6 +9,12 @@
 namespace mclite {
 
 const DefaultString DEFAULT_STRINGS[] = {
+    // Local radio diagnostics
+    {"air_axis", "RSSI: -140..-20 dBm | 9.6 s | RX: dBm/dB"},
+    {"air_waiting", "Waiting for radio packets..."},
+    {"air_offline", "radio offline"},
+    {"air_help", "Current channel only; no frequency scan or retuning. Mesh traffic continues.\n\nCurve: instantaneous RSSI every 100 ms, last 9.6 seconds, oldest left. Gaps mean TX, pause, or no valid sample. Short bursts can be missed. This is not a calibrated noise-floor or occupancy measurement.\n\nDots: received packet RSSI. ADV green, CH cyan, DM orange, ACK yellow, other types grey. TX purple at the top, TX failures red; TX has no receive RSSI/SNR.\n\nList: newest four packets, RSSI in dBm / SNR in dB, length in bytes, age in seconds. Packet types come from parsed headers, not verified or decrypted contents. Includes duplicates and traffic not addressed to you; CRC errors are not listed.\n\nRX/TX/! count received frames, completed transmissions and TX failures during this view. Reset or reopening starts a new session. Sampling pauses while dimmed or locked; leaving stops it. Nothing is written to SD."},
+
     // Received channel message paths
     {"path_link", "Path"},
     {"path_title", "Received path"},

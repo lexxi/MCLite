@@ -1,5 +1,5 @@
 {
-    "version": 62,
+    "version": 64,
     "no_sd_title": "Nessuna scheda SD",
     "no_sd_msg": "Inserire una scheda SD con config.json\ne riavviare.\n\nUsare il MCLite Config Tool\nper creare la configurazione.",
     "setup_title": "Configurazione necessaria",
@@ -354,5 +354,17 @@
     "radar_nodes": "nodi",
     "radar_no_fix": "Posizione GPS non disponibile. Scegliere Hops.",
     "radar_empty": "Nessun annuncio corrispondente.",
-    "radar_gone": "Nodo non piu nella cache."
+    "radar_gone": "Nodo non piu nella cache.",
+    "path_link": "Percorso",
+    "path_title": "Percorso ricevuto",
+    "path_note": "Identificatori dei relay del messaggio, in ordine. Nomi e posizioni noti attualmente, identita non verificate. I vuoti restano aperti. Nessuna posizione dedotta per mittente o destinatario.",
+    "path_direct": "Ricevuto direttamente, senza relay.",
+    "path_unknown": "sconosciuto",
+    "path_ambiguous": "prefisso ambiguo",
+    "path_no_gps": "senza posizione",
+    "path_map": "Relay sulla mappa",
+    "air_axis": "RSSI: -140..-20 dBm | 9,6 s | RX: dBm/dB",
+    "air_waiting": "In attesa di pacchetti radio...",
+    "air_offline": "radio non disponibile",
+    "air_help": "Solo il canale attuale, senza scansione o cambio frequenza. Il mesh continua.\n\nCurva: RSSI istantaneo ogni 100 ms negli ultimi 9,6 secondi, valori vecchi a sinistra. Vuoti: TX, pausa o misura non valida. Impulsi brevi possono mancare. Non misura calibrata del rumore o dell'occupazione.\n\nPunti: RSSI dei pacchetti. ADV verde, CH ciano, DM arancione, ACK giallo, altri grigi. TX viola in alto, errori rossi, senza RSSI/SNR di ricezione.\n\nLista: ultimi quattro pacchetti, RSSI dBm / SNR dB, byte, eta in secondi. Tipi dalle intestazioni, senza verifica del contenuto. Include duplicati e traffico altrui, esclude errori CRC.\n\nRX/TX/! contano ricezioni, trasmissioni completate ed errori della sessione. Reset o riapertura azzera. Pausa con schermo attenuato o bloccato, arresto uscendo. Nessuna scrittura SD."
 }

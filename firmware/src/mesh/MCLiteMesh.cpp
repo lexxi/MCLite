@@ -1,4 +1,5 @@
 #include "MCLiteMesh.h"
+#include "../util/AirViewData.h"
 #include "util/log.h"
 #include "ContactStore.h"
 #include "ChannelStore.h"
@@ -332,6 +333,18 @@ void MCLiteMesh::loop() {
     uint32_t nowMs = millis();
     for (int i = 0; i < REPEAT_SLOTS; i++)
         if (_repeats[i].used && (int32_t)(nowMs - _repeats[i].expiryMs) >= 0) _repeats[i].used = false;
+}
+
+void MCLiteMesh::logRx(mesh::Packet* packet, int length, float) {
+    if (!packet || !AirViewData::instance().active()) return;
+    AirViewData::instance().packet(millis(), packet->getPayloadType(), length,
+                                  _radio->getLastRSSI(), packet->getSNR());
+}
+void MCLiteMesh::logTx(mesh::Packet* packet, int length) {
+    if (packet) AirViewData::instance().packet(millis(), packet->getPayloadType(), length, 0, 0, true);
+}
+void MCLiteMesh::logTxFail(mesh::Packet* packet, int length) {
+    if (packet) AirViewData::instance().packet(millis(), packet->getPayloadType(), length, 0, 0, true, true);
 }
 
 bool MCLiteMesh::sendControlData(const uint8_t* data, size_t len) {

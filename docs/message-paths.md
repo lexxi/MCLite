@@ -53,4 +53,6 @@ Konfiguration und Karten müssen nicht neu erstellt werden.
 Hardwareprüfung: eine neue direkte und eine weitergeleitete Kanalnachricht
 empfangen, Pfad öffnen, bekannte/unbekannte Relays prüfen, Karte öffnen, zoomen,
 verschieben und schließen. Nach Neustart die gespeicherte Hop-Liste erneut öffnen.
-Firmware-Build und diese Hardwareprüfung stehen bei Einführung noch aus.
+Stand 2026-11-16: Firmware-Build und Pfad-Anzeige mit zwei neuen Kanalnachrichten
+am T-Deck bestätigt. Längere Routen, Lücken, Kartenfälle und Verhalten nach
+Neustart sind noch nicht vollständig am Gerät geprüft.

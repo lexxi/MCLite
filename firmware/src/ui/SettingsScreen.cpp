@@ -441,6 +441,20 @@ void SettingsScreen::buildRadio() {
     addNavRowGated(t("lbl_offgrid_preset"), offgridPresetLabel(cfg.offgrid),
                    offgridPresetRowCb, false);
 
+    // Read-only local radio diagnostics, same availability as Heard Adverts.
+    {
+        auto* row = createRowContainer(_content);
+        auto* label = lv_label_create(row);
+        lv_label_set_text(label, "AirView");
+        lv_obj_set_style_text_font(label, FONT_BODY, 0);
+        lv_obj_set_style_text_color(label, theme::TEXT_PRIMARY(), 0);
+        auto* chevron = lv_label_create(row);
+        lv_label_set_text(chevron, LV_SYMBOL_RIGHT);
+        lv_obj_set_style_text_color(chevron, theme::TEXT_SECONDARY(), 0);
+        lv_obj_add_flag(row, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_add_event_cb(row, airViewRowCb, LV_EVENT_CLICKED, this);
+    }
+
     // Heard adverts — live count, opens the list. _heardCountLabel refreshed by tick().
     {
         lv_obj_t* row = createRowContainer(_content);
@@ -1799,6 +1813,11 @@ void SettingsScreen::tick() {
 
 void SettingsScreen::backBtnCb(lv_event_t* e) {
     UIManager::instance().showScreen(Screen::ADMIN);
+}
+
+void SettingsScreen::airViewRowCb(lv_event_t*) {
+    UIManager::swallowTouchUntilRelease();
+    lv_async_call([](void*) { UIManager::instance().showScreen(Screen::AIRVIEW); }, nullptr);
 }
 
 void SettingsScreen::heardAdvertsRowCb(lv_event_t* e) {

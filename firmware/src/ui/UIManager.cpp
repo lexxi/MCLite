@@ -66,6 +66,7 @@ bool UIManager::init() {
     _settingsScreen.create(_mainScreen);
     _heardAdvertsScreen.create(_mainScreen);
     _radarScreen.create(_mainScreen);
+    _airViewScreen.create(_mainScreen);
     _wifiSetupScreen.create(_mainScreen);
     _usbSetupScreen.create(_mainScreen);
     _bleSetupScreen.create(_mainScreen);
@@ -285,6 +286,7 @@ void UIManager::update() {
     // Both no-op cheaply when not visible / version unchanged.
     _heardAdvertsScreen.tick();
     _radarScreen.tick();
+    _airViewScreen.tick(!_dimmed && !_isLocked && !_keyLocked);
     _adminScreen.tick();
     _settingsScreen.tick();  // live Heard-Adverts count on the Radio section
     _wifiSetupScreen.tick();
@@ -393,6 +395,7 @@ void UIManager::showScreen(Screen screen) {
     _settingsScreen.hide();
     _heardAdvertsScreen.hide();
     _radarScreen.hide();
+    _airViewScreen.hide();
     _wifiSetupScreen.hide();
     _usbSetupScreen.hide();
     _bleSetupScreen.hide();
@@ -413,6 +416,9 @@ void UIManager::showScreen(Screen screen) {
             break;
         case Screen::HEARD_ADVERTS:
             _heardAdvertsScreen.show();
+            break;
+        case Screen::AIRVIEW:
+            _airViewScreen.show();
             break;
         case Screen::RADAR:
             _radarScreen.show();
@@ -1135,6 +1141,7 @@ void UIManager::showSetupScreen(SetupReason reason) {
     _adminScreen.hide();
     _heardAdvertsScreen.hide();
     _radarScreen.hide();
+    _airViewScreen.hide();
     _wifiSetupScreen.hide();
     _usbSetupScreen.hide();
     _bleSetupScreen.hide();

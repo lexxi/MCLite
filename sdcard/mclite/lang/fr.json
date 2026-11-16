@@ -1,5 +1,5 @@
 {
-    "version": 62,
+    "version": 64,
     "no_sd_title": "Pas de carte SD",
     "no_sd_msg": "Inserer une carte SD avec config.json\net redemarrer.\n\nUtilisez l'outil MCLite Config Tool\npour creer votre configuration.",
     "setup_title": "Configuration requise",
@@ -354,5 +354,17 @@
     "radar_nodes": "noeuds",
     "radar_no_fix": "Position GPS indisponible. Choisir Hops.",
     "radar_empty": "Aucune annonce correspondante.",
-    "radar_gone": "Noeud absent du cache."
+    "radar_gone": "Noeud absent du cache.",
+    "path_link": "Chemin",
+    "path_title": "Chemin recu",
+    "path_note": "Identifiants des relais de ce message, dans l'ordre. Noms et positions connus actuellement, identites non verifiees. Les inconnus restent des trous. Aucune position deduite pour expediteur ou destinataire.",
+    "path_direct": "Recu directement, sans relais.",
+    "path_unknown": "inconnu",
+    "path_ambiguous": "prefixe ambigu",
+    "path_no_gps": "sans position",
+    "path_map": "Relais sur la carte",
+    "air_axis": "RSSI: -140..-20 dBm | 9,6 s | RX: dBm/dB",
+    "air_waiting": "Attente de paquets radio...",
+    "air_offline": "radio indisponible",
+    "air_help": "Canal actuel uniquement, sans balayage ni changement de frequence. Le mesh continue.\n\nCourbe: RSSI instantane toutes les 100 ms sur 9,6 secondes, ancien a gauche. Les trous indiquent TX, pause ou mesure invalide. Les impulsions breves peuvent manquer. Ce n'est pas une mesure calibree du bruit ou de l'occupation.\n\nPoints: RSSI des paquets. ADV vert, CH cyan, DM orange, ACK jaune, autres gris. TX violet en haut, echecs rouges, sans RSSI/SNR de reception.\n\nListe: quatre derniers paquets, RSSI dBm / SNR dB, octets, age en secondes. Types issus des en-tetes, sans verification du contenu. Doublons et trafic tiers inclus, erreurs CRC exclues.\n\nRX/TX/! comptent receptions, emissions terminees et echecs de la session. Reset ou reouverture remet a zero. Pause si ecran attenue ou verrouille, arret en quittant. Aucune ecriture SD."
 }

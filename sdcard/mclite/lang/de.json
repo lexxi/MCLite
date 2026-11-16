@@ -1,5 +1,5 @@
 {
-    "version": 63,
+    "version": 64,
     "no_sd_title": "Keine SD-Karte",
     "no_sd_msg": "SD-Karte mit config.json einlegen\nund neu starten.\n\nVerwenden Sie das MCLite Config Tool\num Ihre Konfiguration zu erstellen.",
     "setup_title": "Einrichtung erforderlich",
@@ -357,10 +357,14 @@
     "radar_gone": "Knoten nicht mehr im Empfangsspeicher.",
   "path_link": "Pfad",
   "path_title": "Empfangspfad",
-  "path_note": "Relay-Kennungen dieser Nachricht in Empfangsreihenfolge. Namen/Positionen sind aktuell bekannte Zuordnungen, keine verifizierten Identitäten. Lücken bleiben offen. Absender-/Empfängerpositionen werden nicht ergänzt.",
+  "path_note": "Relay-Kennungen dieser Nachricht in Empfangsreihenfolge. Namen/Positionen sind aktuell bekannte Zuordnungen, keine verifizierten Identit\u00e4ten. L\u00fccken bleiben offen. Absender-/Empf\u00e4ngerpositionen werden nicht erg\u00e4nzt.",
   "path_direct": "Direkt empfangen, ohne Relays.",
   "path_unknown": "unbekannt",
   "path_ambiguous": "mehrdeutige Kennung",
   "path_no_gps": "keine Position",
-  "path_map": "Relays auf Karte"
+  "path_map": "Relays auf Karte",
+    "air_axis": "RSSI: -140..-20 dBm | 9,6 s | RX: dBm/dB",
+    "air_waiting": "Warte auf Funkpakete...",
+    "air_offline": "Radio nicht bereit",
+    "air_help": "Nur der eingestellte Kanal; kein Frequenzscan oder Kanalwechsel. Meshbetrieb l\u00e4uft weiter.\n\nKurve: aktueller RSSI alle 100 ms, letzte 9,6 Sekunden, \u00e4lteste Werte links. L\u00fccken bedeuten TX, Pause oder keinen g\u00fcltigen Messwert. Kurze Impulse k\u00f6nnen fehlen. Keine kalibrierte Rausch- oder Belegungsmessung.\n\nPunkte: Paket-RSSI. ADV gr\u00fcn, CH t\u00fcrkis, DM orange, ACK gelb, andere Typen grau. TX violett am oberen Rand, Sendefehler rot. TX hat keinen Empfangs-RSSI/SNR.\n\nListe: neueste vier Pakete, RSSI in dBm / SNR in dB, L\u00e4nge in Bytes, Alter in Sekunden. Typen aus lesbaren Paketk\u00f6pfen, keine verifizierten oder entschl\u00fcsselten Inhalte. Auch Duplikate und fremde Pakete z\u00e4hlen; CRC-Fehler fehlen.\n\nRX/TX/! z\u00e4hlen Empfang, abgeschlossene Sendungen und Sendefehler dieser Ansicht. Reset oder erneutes \u00d6ffnen beginnt neu. Bei Dimmung oder Sperre pausiert die Messung; Verlassen stoppt sie. Keine SD-Schreibzugriffe."
 }

@@ -8,6 +8,7 @@
 #include "SettingsScreen.h"
 #include "HeardAdvertsScreen.h"
 #include "RadarScreen.h"
+#include "AirViewScreen.h"
 #include "WiFiSetupScreen.h"
 #include "UsbSetupScreen.h"
 #include "BleSetupScreen.h"
@@ -23,6 +24,7 @@ enum class Screen {
     DEVICE_SETTINGS,
     HEARD_ADVERTS,
     RADAR,
+    AIRVIEW,
     WIFI_SETUP,
     USB_SETUP,
     BLE_SETUP
@@ -198,6 +200,7 @@ private:
     SettingsScreen _settingsScreen;
     HeardAdvertsScreen  _heardAdvertsScreen;
     RadarScreen         _radarScreen;
+    AirViewScreen       _airViewScreen;
     WiFiSetupScreen     _wifiSetupScreen;
     UsbSetupScreen      _usbSetupScreen;
     BleSetupScreen      _bleSetupScreen;

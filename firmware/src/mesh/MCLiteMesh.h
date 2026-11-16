@@ -232,6 +232,8 @@ public:
     // This node's 32-byte public key (mesh::Mesh::self_id). Stable after begin().
     const uint8_t* selfPubKey() const { return self_id.pub_key; }
 
+    bool radioInReceiveMode() const { return _radio && _radio->isInRecvMode(); }
+
     bool isReady() const { return _ready; }
 
     // Set configured frequency (must be called before begin())
@@ -256,6 +258,9 @@ public:
     void deleteAdvertBlob(const uint8_t* pubKey);
 
 protected:
+    void logRx(mesh::Packet* packet, int length, float score) override;
+    void logTx(mesh::Packet* packet, int length) override;
+    void logTxFail(mesh::Packet* packet, int length) override;
     // A zero-hop control/discovery packet arrived. The base class ignores these
     // entirely (Mesh::onControlDataRecv is an empty virtual), which meant an
     // MCLite node stayed silent when anyone ran "Discover Nodes" nearby. Forward

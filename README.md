@@ -170,3 +170,9 @@ Die Firmware steht unter der [MIT-Lizenz](LICENSE). Urheber- und Lizenzhinweise 
 Ab 0.4.6-ap.6: neue empfangene Kanalnachrichten speichern ihre Relay-Kennungen.
 Der **Pfad**-Link öffnet die Hop-Liste und bei verfügbaren Positionen eine Karte.
 [Bedienung, Update und Grenzen](docs/message-paths.md).
+
+### AirView (Fork)
+
+Ab 0.4.6-ap.7: **Einstellungen → Radio → AirView** zeigt den Live-Pegel und
+Mesh-Pakettypen mit RSSI/SNR auf dem eingestellten Kanal.
+[Bedienung und Grenzen](docs/airview.md).

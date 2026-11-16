@@ -205,6 +205,7 @@ private:
     lv_obj_t* _heardCountLabel = nullptr;
     uint32_t  _heardCacheVersion = 0;
     static void heardAdvertsRowCb(lv_event_t* e);
+    static void airViewRowCb(lv_event_t* e);
 
     // Offgrid toggle (Radio section) — opens a reboot-confirm dialog.
     static void offgridRowCb(lv_event_t* e);
