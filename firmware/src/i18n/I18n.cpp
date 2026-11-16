@@ -9,6 +9,16 @@
 namespace mclite {
 
 const DefaultString DEFAULT_STRINGS[] = {
+    // Received channel message paths
+    {"path_link", "Path"},
+    {"path_title", "Received path"},
+    {"path_note", "Relay hashes from this message, in receive order. Names/positions are current known matches, not verified identities. Gaps stay open. Sender/receiver positions are not inferred."},
+    {"path_direct", "Received directly, without relays."},
+    {"path_unknown", "unknown"},
+    {"path_ambiguous", "ambiguous prefix"},
+    {"path_no_gps", "no position"},
+    {"path_map", "Show relays on map"},
+
     // Setup screens
     {"no_sd_title",         "No SD Card"},
     {"no_sd_msg",           "Insert an SD card with config.json\nand reboot.\n\nUse the MCLite Config Tool to\ncreate your configuration."},

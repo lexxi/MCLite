@@ -2,6 +2,15 @@
 
 Dieses Dokument beschreibt unsere Änderungen. Das geerbte [CHANGELOG.md](CHANGELOG.md) dokumentiert die Upstream-Entwicklung.
 
+## 0.4.6-ap.6
+
+- Empfangspfad neuer Kanal-Flood-Nachrichten mit Hash-Breite im SD-Verlauf speichern; Altverläufe bleiben lesbar.
+- Pfad-Link an der Nachricht: Hop-Liste, direkt/unbekannt/mehrdeutig/ohne Position unterscheiden.
+- Karte mit nummerierten Relays und Linien nur zwischen unmittelbar aufeinanderfolgenden, lokalisierbaren Hops; keine erfundenen Endpunkte.
+- Bekannte vollständige Schlüssel vor dem Präfixabgleich deduplizieren; auch Kandidaten ohne GPS zählen bei Kollisionen.
+- History-Lesegrenze auf 256 KiB erweitert, deutsche Texte und [Bedienungsanleitung](docs/message-paths.md) ergänzt.
+- Native Pfad-/Grenzwert-/Kollisions-/Clipping-Tests; Firmware-Build und Gerätetest noch offen.
+
 ## 0.4.6-ap.5
 
 - WLAN-Karten-Upload im bestehenden Config-AP: Ordnerauswahl, einzelne PNG-Kacheln direkt auf SD, Fortschritt und Stoppen nach der laufenden Kachel.

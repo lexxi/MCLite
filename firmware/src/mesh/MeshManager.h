@@ -1,4 +1,5 @@
 #pragma once
+#include "../util/MessagePath.h"
 
 #include <cstdint>
 #include <functional>
@@ -21,7 +22,7 @@ using OnGroupMsgCallback = std::function<void(uint8_t channelIdx,
                                                const String& senderName,
                                                const String& text,
                                                uint32_t timestamp,
-                                               uint8_t hops)>;
+                                               uint8_t hops, const MessagePath& path)>;
 using OnAckCallback      = std::function<void(uint32_t packetId)>;
 using OnRepeatCallback   = std::function<void(uint32_t packetId, uint8_t repeaterCount)>;
 using OnFailCallback     = std::function<void(uint32_t packetId)>;

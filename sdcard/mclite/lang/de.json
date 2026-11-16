@@ -1,5 +1,5 @@
 {
-    "version": 62,
+    "version": 63,
     "no_sd_title": "Keine SD-Karte",
     "no_sd_msg": "SD-Karte mit config.json einlegen\nund neu starten.\n\nVerwenden Sie das MCLite Config Tool\num Ihre Konfiguration zu erstellen.",
     "setup_title": "Einrichtung erforderlich",
@@ -354,5 +354,13 @@
     "radar_nodes": "Knoten",
     "radar_no_fix": "Keine nutzbare GPS-Position. Auf Hops wechseln.",
     "radar_empty": "Noch keine passenden Adverts.",
-    "radar_gone": "Knoten nicht mehr im Empfangsspeicher."
+    "radar_gone": "Knoten nicht mehr im Empfangsspeicher.",
+  "path_link": "Pfad",
+  "path_title": "Empfangspfad",
+  "path_note": "Relay-Kennungen dieser Nachricht in Empfangsreihenfolge. Namen/Positionen sind aktuell bekannte Zuordnungen, keine verifizierten Identitäten. Lücken bleiben offen. Absender-/Empfängerpositionen werden nicht ergänzt.",
+  "path_direct": "Direkt empfangen, ohne Relays.",
+  "path_unknown": "unbekannt",
+  "path_ambiguous": "mehrdeutige Kennung",
+  "path_no_gps": "keine Position",
+  "path_map": "Relays auf Karte"
 }

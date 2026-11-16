@@ -25,6 +25,12 @@ static constexpr int MAP_CANVAS_H  = Display::height();
 // location, with close / zoom-in / center / zoom-out controls overlaid.
 // Drag the canvas with one finger to pan; Center snaps back to the contact's
 // original lat/lon.
+struct MessagePathPoint {
+    bool located = false;
+    double lat = 0.0, lon = 0.0;
+    String label;
+};
+
 class MapScreen {
 public:
     // Open the general map focused on one contact (telemetry "Map" button):
@@ -36,6 +42,7 @@ public:
     // Centers on own location, else the most-recent heard-with-GPS node. No-ops
     // (no open) if there's nothing to show — caller should have checked tiles.
     void openGeneral();
+    void openMessagePath(const std::vector<MessagePathPoint>& points);
 
     // Close: restores the previous screen, deletes widgets and the canvas
     // buffer. Safe to call when not open.
@@ -57,6 +64,7 @@ private:
     void recenter();               // own location if available, else the open-center
     void panBy(int dxPx, int dyPx); // shift view by pixel delta (button pan)
     void renderTiles();
+    void drawMessagePath();
     void drawHeardMarkers();       // type-letter dots for contacts + heard nodes w/ GPS
     void drawOwnMarker();
     // lat/lon -> canvas pixel; returns false if well off-canvas. Shared by draw + tap.
@@ -100,6 +108,9 @@ private:
     lv_obj_t*   _selLabel     = nullptr;   // tapped-marker name (general mode), hidden by default
     lv_group_t* _mapGroup     = nullptr;
     lv_group_t* _prevGroup    = nullptr;
+
+    bool _pathMode = false;
+    std::vector<MessagePathPoint> _pathPoints;
 
     bool        _general      = false;     // true = general map (heard markers), false = single contact
 

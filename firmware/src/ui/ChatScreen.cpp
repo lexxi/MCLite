@@ -579,6 +579,27 @@ void ChatScreen::addBubble(const Message& msg) {
         else               lv_label_set_text_fmt(hop, "x%u", (unsigned)msg.hops);
     }
 
+    if (!msg.fromSelf && _currentConvo && _currentConvo->type == ConvoId::CHANNEL && msg.receivedPath.valid(msg.hops)) {
+        lv_obj_t* path = lv_label_create(meta);
+        lv_obj_set_style_text_font(path, FONT_BODY, 0);
+        lv_obj_set_style_text_color(path, theme::ACCENT(), 0);
+        lv_label_set_text(path, t("path_link"));
+        lv_obj_add_flag(path, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_set_ext_click_area(path, 5);
+        auto* snapshot = new Message{};
+        snapshot->senderName = msg.senderName;
+        snapshot->hops = msg.hops;
+        snapshot->receivedPath = msg.receivedPath;
+        lv_obj_set_user_data(path, snapshot);
+        lv_obj_add_event_cb(path, [](lv_event_t* e) {
+            auto* message = static_cast<Message*>(lv_obj_get_user_data(lv_event_get_target(e)));
+            UIManager::instance().showMessagePath(*message);
+        }, LV_EVENT_SHORT_CLICKED, nullptr);
+        lv_obj_add_event_cb(path, [](lv_event_t* e) {
+            delete static_cast<Message*>(lv_obj_get_user_data(lv_event_get_target(e)));
+        }, LV_EVENT_DELETE, nullptr);
+    }
+
     // Delivery status (outgoing only)
     if (msg.fromSelf) {
         lv_obj_t* status = lv_label_create(meta);

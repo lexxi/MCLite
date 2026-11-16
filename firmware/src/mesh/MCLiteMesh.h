@@ -1,4 +1,5 @@
 #pragma once
+#include "../util/MessagePath.h"
 
 // MAX_CONTACTS and MAX_GROUP_CHANNELS are defined as build flags in platformio.ini
 // (they must be set before BaseChatMesh.h is compiled)
@@ -33,7 +34,8 @@ static constexpr uint8_t TELEM_CHANNEL_SELF      = 1;
 using MeshMessageCb  = std::function<void(const ContactInfo& contact,
                                            uint32_t timestamp, const char* text, uint8_t hops)>;
 using MeshGroupMsgCb = std::function<void(const mesh::GroupChannel& channel,
-                                           uint32_t timestamp, const char* text, uint8_t hops)>;
+                                           uint32_t timestamp, const char* text, uint8_t hops,
+                                           const MessagePath& path)>;
 using MeshAckCb      = std::function<void(uint32_t packetId)>;
 using MeshFailCb     = std::function<void(uint32_t packetId)>;
 // A sent channel (flood) message was heard echoed back by N distinct repeaters.

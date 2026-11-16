@@ -167,6 +167,7 @@ public:
 
     // Open the map centered on an arbitrary coordinate (no contact). Used by the
     // tap-to-map link on a GPS coordinate in a chat message. Deferred via async.
+    void showMessagePath(const Message& message);
     void openMapAt(double lat, double lon, const String& name);
     // Same, but with the node's pubKey so the map shows its real marker
     // type/name (used by the Heard Adverts per-row map button). Deferred.
@@ -315,6 +316,7 @@ private:
 
     // Map screen state
     MapScreen _mapScreen;
+    std::vector<MessagePathPoint> _pendingMessagePath;
     double    _pendingMapLat = 0.0;
     double    _pendingMapLon = 0.0;
     String    _pendingMapName;

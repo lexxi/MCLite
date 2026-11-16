@@ -95,7 +95,7 @@ void MeshManager::wireCallbacks() {
 
     // Incoming group message
     _mesh->onGroupMsg([this](const mesh::GroupChannel& channel,
-                              uint32_t timestamp, const char* text, uint8_t hops) {
+                              uint32_t timestamp, const char* text, uint8_t hops, const MessagePath& path) {
         if (!_onGroupMsg) return;
 
         // Find which of our channels this message belongs to
@@ -126,7 +126,7 @@ void MeshManager::wireCallbacks() {
             msgText = fullText.substring(colonPos + 2);
         }
 
-        _onGroupMsg(channelIndex, senderName, msgText, timestamp, hops);
+        _onGroupMsg(channelIndex, senderName, msgText, timestamp, hops, path);
     });
 
     // ACK received — UIManager handles MessageStore update

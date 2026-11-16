@@ -164,3 +164,9 @@ Upstream-Code, Bilder und Werkzeuge bleiben für die vorhandenen Funktionen und 
 ## Lizenz
 
 Die Firmware steht unter der [MIT-Lizenz](LICENSE). Urheber- und Lizenzhinweise des Originalprojekts sowie der eingebundenen Bibliotheken und Schriftdateien bleiben erhalten. Weitere Hinweise: [LICENSES.md](LICENSES.md).
+
+### Empfangspfad von Kanalnachrichten (Fork)
+
+Ab 0.4.6-ap.6: neue empfangene Kanalnachrichten speichern ihre Relay-Kennungen.
+Der **Pfad**-Link öffnet die Hop-Liste und bei verfügbaren Positionen eine Karte.
+[Bedienung, Update und Grenzen](docs/message-paths.md).

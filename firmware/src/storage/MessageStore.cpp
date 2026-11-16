@@ -60,7 +60,7 @@ void MessageStore::loadHistory(const ConvoId& id) {
 
     if (!sd.fileExists(path.c_str())) return;
 
-    String json = sd.readFile(path.c_str());
+    String json = sd.readFile(path.c_str(), 256 * 1024);
     if (json.isEmpty()) return;
 
     JsonDocument doc;
@@ -115,6 +115,9 @@ void MessageStore::loadHistory(const ConvoId& id) {
         else if (strcmp(status, "sending") == 0) msg.status = MessageStatus::FAILED;  // Can't ACK after reboot
         else                                     msg.status = MessageStatus::SENT;
         msg.hops = obj["hops"] | 0;
+        msg.receivedPath.hashSize = obj["pathWidth"] | 0;
+        msg.receivedPath.hex = obj["path"] | "";
+        if (!msg.receivedPath.valid(msg.hops)) msg.receivedPath = MessagePath{};
         msg.repeaterCount = obj["rpt"] | 0;
         msg.msgHash = obj["hash"] | "";
         msg.prevMsgHash = obj["phash"] | "";
@@ -178,6 +181,10 @@ void MessageStore::saveHistory(const ConvoId& id) {
             obj["sender"] = msg.senderName;
         }
         if (msg.hops > 0) obj["hops"] = msg.hops;   // received hop count (omit when 0/direct)
+        if (!msg.fromSelf && msg.receivedPath.valid(msg.hops)) {
+            obj["pathWidth"] = msg.receivedPath.hashSize;
+            obj["path"] = msg.receivedPath.hex;
+        }
         if (msg.repeaterCount > 0) obj["rpt"] = msg.repeaterCount;   // heard-by-N-repeaters (#39)
         if (msg.msgHash.length() > 0) obj["hash"] = msg.msgHash;
         if (msg.prevMsgHash.length() > 0) obj["phash"] = msg.prevMsgHash;

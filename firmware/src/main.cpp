@@ -361,7 +361,7 @@ static void setupMeshCallbacks() {
     });
 
     mesh.onGroupMessage([](uint8_t channelIdx, const String& senderName,
-                            const String& text, uint32_t timestamp, uint8_t hops) {
+                            const String& text, uint32_t timestamp, uint8_t hops, const MessagePath& path) {
         Channel* ch = ChannelStore::instance().findByIndex(channelIdx);
         if (!ch) return;
         ConvoId id{ConvoId::CHANNEL, ch->name};
@@ -372,6 +372,7 @@ static void setupMeshCallbacks() {
         msg.senderName = senderName;
         msg.status = MessageStatus::DELIVERED;
         msg.hops = hops;
+        msg.receivedPath = path;
         UIManager::instance().onIncomingMessage(id, msg);
     });
 

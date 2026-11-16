@@ -943,7 +943,12 @@ void MCLiteMesh::onChannelMessageRecv(const mesh::GroupChannel& channel,
                                        mesh::Packet* pkt,
                                        uint32_t timestamp, const char* text) {
     LOGF("[MCLiteMesh] Group msg on channel: %s\n", text);
-    if (_onGroupMsg) _onGroupMsg(channel, timestamp, text, pkt ? pkt->getPathHashCount() : 0);
+    MessagePath path;
+    const uint8_t hops = pkt ? pkt->getPathHashCount() : 0;
+    if (pkt && pkt->isRouteFlood()) {
+        path = MessagePath::capture(pkt->path, pkt->getPathHashSize(), hops);
+    }
+    if (_onGroupMsg) _onGroupMsg(channel, timestamp, text, hops, path);
 }
 
 uint32_t MCLiteMesh::calcFloodTimeoutMillisFor(uint32_t pkt_airtime_millis) const {

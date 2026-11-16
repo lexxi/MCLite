@@ -1,4 +1,5 @@
 #include "MapScreen.h"
+#include "../util/PathLine.h"
 #include "../util/zoom_pick.h"
 #include "util/log.h"
 #include "UIManager.h"
@@ -80,6 +81,8 @@ void MapScreen::open(const uint8_t* pubKey, double contactLat, double contactLon
                      const String& contactName) {
     if (_screen) return;  // already open
 
+    _pathMode = false;
+    _pathPoints.clear();
     // Same general map, just opened focused on one contact: center on it,
     // pre-select it (highlight ring + bigger dot + name in the bottom label),
     // and guarantee it shows even if it isn't in the contact/heard caches yet.
@@ -181,6 +184,8 @@ bool MapScreen::chooseGeneralCenter(double& lat, double& lon) {
 
 void MapScreen::openGeneral() {
     if (_screen) return;
+    _pathMode = false;
+    _pathPoints.clear();
     double clat, clon;
     if (!chooseGeneralCenter(clat, clon)) {
         UIManager::instance().showToast(t("map_no_locations"));
@@ -194,6 +199,23 @@ void MapScreen::openGeneral() {
     _contactLon  = clon;
     _centerLat   = clat;
     _centerLon   = clon;
+    doOpen();
+}
+
+void MapScreen::openMessagePath(const std::vector<MessagePathPoint>& points) {
+    if (_screen) return;
+    const MessagePathPoint* first = nullptr;
+    for (const auto& point : points) if (point.located) { first = &point; break; }
+    if (!first) return;
+    _pathMode = true;
+    _pathPoints = points;
+    _general = true;
+    _hasSel = false;
+    _hasFocus = false;
+    _markers.clear();
+    _contactName = t("path_title");
+    _centerLat = _contactLat = first->lat;
+    _centerLon = _contactLon = first->lon;
     doOpen();
 }
 
@@ -295,6 +317,8 @@ void MapScreen::close() {
     _prevScreen = nullptr;
     _prevGroup = nullptr;
     _zooms.clear();
+    _pathPoints.clear();
+    _pathMode = false;
     LOGLN("[MapScreen] closed");
 }
 
@@ -343,7 +367,7 @@ void MapScreen::buildWidgets() {
     lv_obj_set_style_text_color(backLbl, theme::ACCENT(), 0);
 
     // Title
-    lv_obj_t* title = lv_win_add_title(_screen, t("map_title"));
+    lv_obj_t* title = lv_win_add_title(_screen, t(_pathMode ? "path_title" : "map_title"));
     lv_obj_set_style_text_font(title, FONT_HEADING, 0);
     lv_obj_set_style_text_color(title, theme::TEXT_PRIMARY(), 0);
 
@@ -672,9 +696,12 @@ void MapScreen::destroyWidgets() {
 void MapScreen::render() {
     if (!_canvas || !_cbuf) return;
     renderTiles();
-    drawOwnMarker();
-    buildMarkers();
-    drawHeardMarkers();
+    if (_pathMode) drawMessagePath();
+    else {
+        drawOwnMarker();
+        buildMarkers();
+        drawHeardMarkers();
+    }
     drawCrosshair();
     drawScaleBar();
     lv_obj_invalidate(_canvas);
@@ -763,6 +790,43 @@ static void drawRing(lv_color_t* buf, int bufW, int bufH, int cx, int cy, int r,
             const int d2 = dx * dx + dy * dy;
             if (d2 >= r0 && d2 <= r1) buf[y * bufW + x] = c;
         }
+    }
+}
+
+void MapScreen::drawMessagePath() {
+    // Render only actual consecutive, uniquely resolved relays. Unknown or
+    // ambiguous entries break the line. No inferred sender/receiver endpoint.
+    lv_draw_line_dsc_t line;
+    lv_draw_line_dsc_init(&line);
+    line.color = theme::ACCENT();
+    line.width = 3;
+    const TileFrac center = latLonToTileXY(_centerLat, _centerLon, _zoom);
+    auto pixel = [&](const MessagePathPoint& point, double& x, double& y) {
+        const TileFrac tile = latLonToTileXY(point.lat, point.lon, _zoom);
+        x = CANVAS_W / 2 + (tile.x - center.x) * TILE;
+        y = CANVAS_H / 2 + (tile.y - center.y) * TILE;
+    };
+    for (size_t i = 1; i < _pathPoints.size(); ++i) {
+        if (!_pathPoints[i - 1].located || !_pathPoints[i].located) continue;
+        double x0, y0, x1, y1;
+        pixel(_pathPoints[i - 1], x0, y0); pixel(_pathPoints[i], x1, y1);
+        if (!clipPathLine(x0, y0, x1, y1, CANVAS_W - 1, CANVAS_H - 1)) continue;
+        lv_point_t ends[2] = {{(lv_coord_t)lround(x0), (lv_coord_t)lround(y0)},
+                              {(lv_coord_t)lround(x1), (lv_coord_t)lround(y1)}};
+        lv_canvas_draw_line(_canvas, ends, 2, &line);
+    }
+    lv_draw_label_dsc_t label;
+    lv_draw_label_dsc_init(&label);
+    label.font = FONT_BODY;
+    label.color = lv_color_white();
+    label.align = LV_TEXT_ALIGN_CENTER;
+    for (size_t i = 0; i < _pathPoints.size(); ++i) {
+        if (!_pathPoints[i].located) continue;
+        int x, y;
+        if (!markerScreenPos(_pathPoints[i].lat, _pathPoints[i].lon, x, y)) continue;
+        drawDot(_cbuf, CANVAS_W, CANVAS_H, x, y, 11, theme::ACCENT(), lv_color_black());
+        const String number(unsigned(i + 1));
+        lv_canvas_draw_text(_canvas, x - 11, y - 9, 23, &label, number.c_str());
     }
 }
 
@@ -952,6 +1016,12 @@ void MapScreen::panRightCb(lv_event_t* e) {
 // (_contactLat/Lon — the contact for a focused open, or the chosen node for the
 // general map). Used by the Center button and by Reload.
 void MapScreen::recenter() {
+    if (_pathMode) {
+        _centerLat = _contactLat;
+        _centerLon = _contactLon;
+        render();
+        return;
+    }
     auto& gps = GPS::instance();
     FixStatus fs = gps.fixStatus();
     if (fs == FixStatus::LIVE)            { _centerLat = gps.lat();       _centerLon = gps.lon(); }
@@ -970,6 +1040,22 @@ void MapScreen::hitTestMarker(const lv_point_t& p) {
     lv_obj_get_coords(_canvas, &ca);
     const int tx = p.x - ca.x1;
     const int ty = p.y - ca.y1;
+    if (_pathMode) {
+        const MessagePathPoint* closest = nullptr;
+        int distance = 20 * 20;
+        for (const auto& point : _pathPoints) {
+            if (!point.located) continue;
+            int x, y;
+            if (!markerScreenPos(point.lat, point.lon, x, y)) continue;
+            int d = (tx - x) * (tx - x) + (ty - y) * (ty - y);
+            if (d <= distance) { closest = &point; distance = d; }
+        }
+        if (closest) {
+            lv_label_set_text(_selLabel, closest->label.c_str());
+            lv_obj_clear_flag(_selLabel, LV_OBJ_FLAG_HIDDEN);
+        } else lv_obj_add_flag(_selLabel, LV_OBJ_FLAG_HIDDEN);
+        return;
+    }
     int best = -1, bestD2 = 20 * 20;   // tap tolerance (px²) — fingertip-friendly
     for (size_t i = 0; i < _markers.size(); i++) {
         int px, py;

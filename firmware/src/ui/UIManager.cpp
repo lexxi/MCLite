@@ -1,4 +1,5 @@
 #include "UIManager.h"
+#include <cmath>
 #include "util/log.h"
 #include "theme.h"
 #include "ModalDialog.h"
@@ -17,6 +18,7 @@
 #include "../hal/Battery.h"
 #include "../i18n/I18n.h"
 #include "../storage/TelemetryCache.h"
+#include "../storage/HeardAdvertCache.h"
 #include "../storage/TileLoader.h"
 #include "../util/ContactLocation.h"
 #include "Screenshot.h"
@@ -1990,6 +1992,69 @@ void UIManager::showTelemetryModal(const ConvoId& id) {
     }
 
     LOGF("[UI] Telemetry modal shown for %s\n", contact->name.c_str());
+}
+
+void UIManager::showMessagePath(const Message& message) {
+    if (!message.receivedPath.valid(message.hops)) return;
+    _pendingMessagePath.clear();
+    String body = message.senderName + "\n" + t("path_note") + "\n\n";
+    if (message.hops == 0) body += t("path_direct");
+    auto& cache = HeardAdvertCache::instance();
+    bool canMap = false;
+    for (uint8_t hop = 0; hop < message.hops; ++hop) {
+        MessagePathPoint point;
+        String hash = message.receivedPath.hex.substring(hop * message.receivedPath.hashSize * 2,
+                                                        (hop + 1) * message.receivedPath.hashSize * 2);
+        // Dedupe full identities before counting prefix matches. Missing GPS is
+        // not a reason to exclude an identity from collision detection.
+        std::vector<const uint8_t*> keys;
+        String name;
+        auto consider = [&](const uint8_t* key, const String& candidateName) {
+            if (addMessagePathCandidate(message.receivedPath, hop, keys, key)) name = candidateName;
+        };
+        for (int i = 0; i < cache.count(); ++i)
+            consider(cache.entries()[i].pubKey, cache.entries()[i].name);
+        auto* mesh = MeshManager::instance().mesh();
+        if (mesh) for (int i = 0; i < mesh->getNumContacts(); ++i) {
+            auto* contact = mesh->getContactByIdx(i);
+            if (contact) consider(contact->id.pub_key, contact->name);
+        }
+        // Also include configured contacts that are not yet active in MeshCore.
+        auto& contacts = ContactStore::instance();
+        for (size_t i = 0; i < contacts.count(); ++i) {
+            const auto* contact = contacts.findByIndex(i);
+            if (contact) consider(contact->publicKey, contact->name);
+        }
+        point.label = String(unsigned(hop + 1)) + ". [" + hash + "] ";
+        if (keys.empty()) point.label += t("path_unknown");
+        else if (keys.size() > 1) point.label += t("path_ambiguous");
+        else {
+            point.label += name.length() ? name : hash;
+            const auto location = bestKnownLocation(keys.front());
+            point.located = location.valid && std::isfinite(location.lat) && std::isfinite(location.lon)
+                && location.lat >= -85.05112878 && location.lat <= 85.05112878
+                && location.lon >= -180 && location.lon <= 180;
+            if (point.located) {
+                point.lat = location.lat; point.lon = location.lon;
+                canMap = true;
+            } else point.label += String(" (") + t("path_no_gps") + ")";
+        }
+        body += point.label + "\n";
+        _pendingMessagePath.push_back(point);
+    }
+    canMap = canMap && TileLoader::instance().tilesAvailable();
+    std::vector<String> buttons = { t("btn_ok") };
+    if (canMap) buttons.push_back(t("path_map"));
+    ModalDialog::show(t("path_title"), body, buttons, [this, canMap](lv_obj_t* dlg, int index) {
+        ModalDialog::close(dlg);
+        if (canMap && index == 1) {
+            swallowTouchUntilRelease();
+            lv_async_call([](void* user) {
+                auto* self = static_cast<UIManager*>(user);
+                self->_mapScreen.openMessagePath(self->_pendingMessagePath);
+            }, this);
+        }
+    });
 }
 
 void UIManager::openMapAsync(void* user) {
