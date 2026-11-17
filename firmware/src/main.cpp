@@ -8,6 +8,8 @@
 #include "hal/GPS.h"
 #include "hal/Speaker.h"
 #include "storage/SDCard.h"
+#include "storage/NodeDirectory.h"
+#include "net/NodeDirectoryDownload.h"
 #include "config/ConfigManager.h"
 #include "hal/IInput.h"
 #include "mesh/MeshManager.h"
@@ -200,6 +202,7 @@ void setup() {
         // the SX1262 is disconnected from the antenna.
         Expander::instance().writePin(TWATCH_EXP_LORA_RF_SW, HIGH);
 #endif
+        NodeDirectory::instance().load();
         MeshManager::instance().init();
         setupMeshCallbacks();
 
@@ -274,6 +277,7 @@ void loop() {
     // GPS has synced — GPS is checked first above and wins).
     mclite::TimeHelper::instance().maybeNtpSync();
     MeshManager::instance().update();
+    NodeDirectoryDownload::instance().poll();
     updateCompanion();
     UIManager::instance().update();
     Speaker::instance().update();

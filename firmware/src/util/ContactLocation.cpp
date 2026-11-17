@@ -4,6 +4,7 @@
 #include <cstring>
 
 #include "../storage/TelemetryCache.h"
+#include "../storage/NodeDirectory.h"
 #include "../storage/HeardAdvertCache.h"
 #include "../mesh/MeshManager.h"
 #include "../mesh/MCLiteMesh.h"
@@ -64,6 +65,11 @@ ContactLocation bestKnownLocation(const uint8_t* pubKey32) {
         }
     }
 
+    const auto* node = NodeDirectory::instance().table().find(pubKey32);
+    if (node && node->hasPosition) {
+        r.valid = true; r.lat = node->latE6 / 1e6; r.lon = node->lonE6 / 1e6;
+        r.source = ContactLocation::DIRECTORY; r.approximate = true; r.hasAge = false;
+    }
     return r;
 }
 

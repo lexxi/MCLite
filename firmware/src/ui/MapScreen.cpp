@@ -6,6 +6,7 @@
 #include "theme.h"
 #include "../storage/TileLoader.h"
 #include "../storage/HeardAdvertCache.h"
+#include "../storage/NodeDirectory.h"
 #include "../storage/TelemetryCache.h"
 #include "../util/ContactLocation.h"
 #include "../mesh/MeshManager.h"
@@ -150,7 +151,10 @@ void MapScreen::buildMarkers() {
             ContactInfo* c = mesh->getContactByIdx(i);
             if (!c) continue;
             ContactLocation loc = bestKnownLocation(c->id.pub_key);
-            if (loc.valid) add(loc.lat, loc.lon, c->type, true, c->name, c->id.pub_key);
+            if (loc.valid) {
+                add(loc.lat, loc.lon, c->type, true, c->name, c->id.pub_key);
+                _markers.back().directory = loc.source == ContactLocation::DIRECTORY;
+            }
         }
     }
 
@@ -160,6 +164,24 @@ void MapScreen::buildMarkers() {
     for (int i = 0; i < cache.count(); i++) {
         if (!es[i].hasGps || seen(es[i].pubKey)) continue;
         add(es[i].gpsLat / 1e6, es[i].gpsLon / 1e6, es[i].type, false, es[i].name, es[i].pubKey);
+    }
+
+    // Directory is not a heard-neighbour list. Only show on-screen repeaters,
+    // bounded independently so global data does not fill the marker vector.
+    if (_screen) {
+        const auto& directory = NodeDirectory::instance().table();
+        size_t added = 0;
+        for (size_t i = 0; i < directory.count() && added < 128; ++i) {
+            const auto& node = directory.entries()[i];
+            if (node.type != 2 || !node.hasPosition || seen(node.key)) continue;
+            const double lat = node.latE6 / 1e6, lon = node.lonE6 / 1e6;
+            if (lat < -85.05112878 || lat > 85.05112878) continue;
+            int x, y;
+            if (!markerScreenPos(lat,lon,x,y)) continue;
+            add(lat,lon,node.type,false,node.name,node.key);
+            _markers.back().directory = true;
+            ++added;
+        }
     }
 
     // 3) When opened focused on a contact (telemetry "Map" button), make sure it
@@ -843,7 +865,7 @@ void MapScreen::drawHeardMarkers() {
         // rim, so the symbol reads against any map tile. The selected/focused
         // marker is drawn a bit larger and wrapped in a bold ring.
         bool sel = _hasSel && memcmp(m.key, _selKey, 32) == 0;
-        lv_color_t dotColor = (m.type == ADV_TYPE_CHAT)
+        lv_color_t dotColor = m.directory ? theme::TEXT_TIMESTAMP() : (m.type == ADV_TYPE_CHAT)
             ? (m.isContact ? theme::ACCENT() : theme::TEXT_SECONDARY())
             : mapTypeColor(m.type);
         drawDot(_cbuf, CANVAS_W, CANVAS_H, px, py, sel ? 10 : 8, dotColor, lv_color_black());
@@ -858,7 +880,7 @@ void MapScreen::drawHeardMarkers() {
         // Symbol on top, in black or white — whichever contrasts with the dot.
         dsc.color = (lv_color_brightness(dotColor) > 128) ? lv_color_black() : lv_color_white();
         // Roughly center the single glyph on the coordinate.
-        lv_canvas_draw_text(_canvas, px - 5, py - 9, 16, &dsc, mapTypeLetter(m.type));
+        lv_canvas_draw_text(_canvas, px - 5, py - 9, 16, &dsc, m.directory ? "D" : mapTypeLetter(m.type));
     }
 }
 
@@ -1070,7 +1092,7 @@ void MapScreen::hitTestMarker(const lv_point_t& p) {
     }
     memcpy(_selKey, _markers[best].key, 32);   // highlight this marker with a ring
     _hasSel = true;
-    String s = String(mapTypeWord(_markers[best].type)) + " " + _markers[best].name;
+    String s = (_markers[best].directory ? String("[DB] ") : String(mapTypeWord(_markers[best].type)) + " ") + _markers[best].name;
     lv_label_set_text(_selLabel, s.c_str());
     lv_obj_clear_flag(_selLabel, LV_OBJ_FLAG_HIDDEN);
     lv_obj_align(_selLabel, LV_ALIGN_BOTTOM_MID, 0, -(MAP_CORNER_INSET + theme::PAD_SMALL));

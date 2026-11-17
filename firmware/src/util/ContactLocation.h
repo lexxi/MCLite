@@ -9,7 +9,7 @@ namespace mclite {
 // positions are whatever precision the sender chose to broadcast (we can't tell
 // if they obfuscated), so they're flagged approximate.
 struct ContactLocation {
-    enum Source : uint8_t { NONE, TELEMETRY, ADVERT, HEARD };
+    enum Source : uint8_t { NONE, TELEMETRY, ADVERT, HEARD, DIRECTORY };
 
     bool     valid       = false;
     double   lat         = 0.0;
@@ -25,6 +25,7 @@ struct ContactLocation {
 //   1. fresh telemetry (TelemetryCache, <30 min)  -> accurate
 //   2. the contact's advert GPS (ContactInfo.gps) -> approximate
 //   3. a heard advert with GPS (HeardAdvertCache) -> approximate
+//   4. downloaded SD directory coordinates       -> approximate, external
 // Returns valid=false if nothing is known. pubKey32 may be null.
 ContactLocation bestKnownLocation(const uint8_t* pubKey32);
 

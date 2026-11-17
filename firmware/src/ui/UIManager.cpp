@@ -20,6 +20,7 @@
 #include "../i18n/I18n.h"
 #include "../storage/TelemetryCache.h"
 #include "../storage/HeardAdvertCache.h"
+#include "../storage/NodeDirectory.h"
 #include "../storage/TileLoader.h"
 #include "../util/ContactLocation.h"
 #include "Screenshot.h"
@@ -2018,6 +2019,9 @@ void UIManager::showMessagePath(const Message& message) {
         std::vector<const uint8_t*> keys;
         String name;
         auto consider = [&](const uint8_t* key, const String& candidateName) {
+            // Two distinct identities are enough to prove ambiguity; bound RAM
+            // even when a downloaded prefix matches a large number of nodes.
+            if (keys.size() > 1) return;
             if (addMessagePathCandidate(message.receivedPath, hop, keys, key)) name = candidateName;
         };
         for (int i = 0; i < cache.count(); ++i)
@@ -2033,6 +2037,9 @@ void UIManager::showMessagePath(const Message& message) {
             const auto* contact = contacts.findByIndex(i);
             if (contact) consider(contact->publicKey, contact->name);
         }
+        const auto& directory = NodeDirectory::instance().table();
+        for (size_t i = 0; i < directory.count(); ++i)
+            consider(directory.entries()[i].key, directory.entries()[i].name);
         point.label = String(unsigned(hop + 1)) + ". [" + hash + "] ";
         if (keys.empty()) point.label += t("path_unknown");
         else if (keys.size() > 1) point.label += t("path_ambiguous");
@@ -2045,6 +2052,7 @@ void UIManager::showMessagePath(const Message& message) {
             if (point.located) {
                 point.lat = location.lat; point.lon = location.lon;
                 canMap = true;
+                if (location.source == ContactLocation::DIRECTORY) point.label += " [DB]";
             } else point.label += String(" (") + t("path_no_gps") + ")";
         }
         body += point.label + "\n";

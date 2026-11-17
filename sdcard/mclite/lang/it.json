@@ -1,5 +1,5 @@
 {
-    "version": 64,
+    "version": 65,
     "no_sd_title": "Nessuna scheda SD",
     "no_sd_msg": "Inserire una scheda SD con config.json\ne riavviare.\n\nUsare il MCLite Config Tool\nper creare la configurazione.",
     "setup_title": "Configurazione necessaria",
@@ -366,5 +366,14 @@
     "air_axis": "RSSI: -140..-20 dBm | 9,6 s | RX: dBm/dB",
     "air_waiting": "In attesa di pacchetti radio...",
     "air_offline": "radio non disponibile",
-    "air_help": "Solo il canale attuale, senza scansione o cambio frequenza. Il mesh continua.\n\nCurva: RSSI istantaneo ogni 100 ms negli ultimi 9,6 secondi, valori vecchi a sinistra. Vuoti: TX, pausa o misura non valida. Impulsi brevi possono mancare. Non misura calibrata del rumore o dell'occupazione.\n\nPunti: RSSI dei pacchetti. ADV verde, CH ciano, DM arancione, ACK giallo, altri grigi. TX viola in alto, errori rossi, senza RSSI/SNR di ricezione.\n\nLista: ultimi quattro pacchetti, RSSI dBm / SNR dB, byte, eta in secondi. Tipi dalle intestazioni, senza verifica del contenuto. Include duplicati e traffico altrui, esclude errori CRC.\n\nRX/TX/! contano ricezioni, trasmissioni completate ed errori della sessione. Reset o riapertura azzera. Pausa con schermo attenuato o bloccato, arresto uscendo. Nessuna scrittura SD."
+    "air_help": "Solo il canale attuale, senza scansione o cambio frequenza. Il mesh continua.\n\nCurva: RSSI istantaneo ogni 100 ms negli ultimi 9,6 secondi, valori vecchi a sinistra. Vuoti: TX, pausa o misura non valida. Impulsi brevi possono mancare. Non misura calibrata del rumore o dell'occupazione.\n\nPunti: RSSI dei pacchetti. ADV verde, CH ciano, DM arancione, ACK giallo, altri grigi. TX viola in alto, errori rossi, senza RSSI/SNR di ricezione.\n\nLista: ultimi quattro pacchetti, RSSI dBm / SNR dB, byte, eta in secondi. Tipi dalle intestazioni, senza verifica del contenuto. Include duplicati e traffico altrui, esclude errori CRC.\n\nRX/TX/! contano ricezioni, trasmissioni completate ed errori della sessione. Reset o riapertura azzera. Pausa con schermo attenuato o bloccato, arresto uscendo. Nessuna scrittura SD.",
+    "nodes_download": "Scarica elenco nodi",
+    "nodes_cancel": "Annulla download",
+    "nodes_progress": "Elenco: %u identita caricate",
+    "nodes_saving": "Salvataggio elenco su SD...",
+    "nodes_saved": "Elenco salvato: %u identita",
+    "nodes_count": "Elenco offline: %u identita. Fonte: CarinthiaMesh",
+    "nodes_failed": "Download fallito (WiFi/HTTPS/dati/limite). Elenco precedente conservato.",
+    "nodes_storage": "Errore SD. Dati precedenti conservati in RAM; controllare SD.",
+    "nodes_cancelled": "Annullato. Elenco precedente conservato."
 }

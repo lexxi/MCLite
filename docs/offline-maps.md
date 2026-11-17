@@ -1,6 +1,6 @@
 # Offline-Karten: Kärnten und Umgebung
 
-Stand: 2026-11-02. Zielgerät: T-Deck Plus, MCLite 0.4.6-ap.5.
+Stand: 2026-11-17. Zielgerät: T-Deck Plus, MCLite 0.4.6-ap.5.
 
 ## Aktueller Teststand
 
@@ -11,7 +11,7 @@ Stand: 2026-11-02. Zielgerät: T-Deck Plus, MCLite 0.4.6-ap.5.
 | QGIS | 3.40: Skript ausgeführt, Villach-Darstellung und Testexport bestätigt |
 | WLAN-Karten-Upload | Villach-Testsatz erfolgreich auf SD übertragen |
 | Kartenansicht mit unserem Paket | Villach nach Neustart sichtbar; Zoom 12 ↔ 13 bestätigt |
-| Gesamtgebiet Zoom 8–13 | Anleitung bereit; vollständiger Export/Transfer noch nicht bestätigt |
+| Gesamtgebiet Zoom 8–13 | Kärnten und Umgebung laut Nutzer vollständig auf SD; Rand-/Zoom-Stichproben noch offen |
 
 ## Format und Speicher
 

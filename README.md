@@ -176,3 +176,9 @@ Der **Pfad**-Link öffnet die Hop-Liste und bei verfügbaren Positionen eine Kar
 Ab 0.4.6-ap.7: **Einstellungen → Radio → AirView** zeigt den Live-Pegel und
 Mesh-Pakettypen mit RSSI/SNR auf dem eingestellten Kanal.
 [Bedienung und Grenzen](docs/airview.md).
+
+### Offline-Knotenverzeichnis (Fork)
+
+Ab 0.4.6-ap.8: **WLAN → Knotenverzeichnis laden** importiert CarinthiaMesh-Daten
+per HTTPS auf SD. Pfad und Karte nutzen die vollständigen Kennungen offline.
+[Bedienung, Dateiformat und Grenzen](docs/node-directory.md).

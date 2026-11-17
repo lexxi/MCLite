@@ -18,6 +18,13 @@ public:
     lv_obj_t* obj() { return _screen; }
 
 private:
+    lv_obj_t* _nodesBtn = nullptr;
+    lv_obj_t* _nodesButtonLabel = nullptr;
+    lv_obj_t* _nodesStatus = nullptr;
+    int _nodesLastState = -1;
+    uint32_t _nodesLastProgress = UINT32_MAX;
+    void updateNodesUi();
+    static void nodesBtnCb(lv_event_t* event);
     lv_obj_t* _apBtn = nullptr;
     lv_obj_t* _apLabel = nullptr;
     bool _lastAp = false;

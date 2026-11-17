@@ -1,5 +1,8 @@
 #include "WiFiSetupScreen.h"
 #include "../net/ConfigPortal.h"
+#include "../net/NodeDirectoryDownload.h"
+#include "../storage/NodeDirectory.h"
+#include "../storage/SDCard.h"
 
 #include "theme.h"
 #include "UIManager.h"
@@ -153,6 +156,19 @@ void WiFiSetupScreen::create(lv_obj_t* parent) {
     lv_obj_center(cbl);
     lv_obj_add_flag(_checkBtn, LV_OBJ_FLAG_HIDDEN);
 
+    _nodesBtn = lv_btn_create(cont);
+    lv_obj_set_width(_nodesBtn,LV_PCT(100));
+    lv_obj_set_style_bg_color(_nodesBtn,theme::ACCENT(),0);
+    lv_obj_add_event_cb(_nodesBtn,nodesBtnCb,LV_EVENT_CLICKED,this);
+    _nodesButtonLabel = lv_label_create(_nodesBtn);
+    lv_obj_set_style_text_font(_nodesButtonLabel,FONT_BODY,0);
+    lv_obj_center(_nodesButtonLabel);
+    _nodesStatus = lv_label_create(cont);
+    lv_obj_set_width(_nodesStatus,LV_PCT(100));
+    lv_obj_set_style_text_font(_nodesStatus,FONT_BODY,0);
+    lv_obj_set_style_text_color(_nodesStatus,theme::TEXT_SECONDARY(),0);
+    lv_label_set_long_mode(_nodesStatus,LV_LABEL_LONG_WRAP);
+
     // Reboot button — shown only when WiFi is locked out by an active BLE stack,
     // giving a one-tap way to reboot into a clean state where WiFi works.
     _rebootBtn = lv_btn_create(cont);
@@ -203,6 +219,9 @@ void WiFiSetupScreen::show() {
 
 void WiFiSetupScreen::tick() {
     if (!_screen || lv_obj_has_flag(_screen, LV_OBJ_FLAG_HIDDEN)) return;
+    auto& download = NodeDirectoryDownload::instance();
+    if (_nodesLastState != int(download.state())) updateStatusUi();
+    else if (_nodesLastProgress != download.progress()) updateNodesUi();
     if (_pwOverlay) return;                       // don't disturb password entry
     bool ap = ConfigPortal::instance().active();
     if (ap != _lastAp) { _lastAp = ap; updateStatusUi(); }
@@ -235,6 +254,7 @@ void WiFiSetupScreen::hide() {
         lv_group_remove_obj(_companionSwitch);
         lv_group_remove_obj(_apBtn);
         lv_group_remove_obj(_checkBtn);
+        lv_group_remove_obj(_nodesBtn);
         lv_group_remove_obj(_rebootBtn);
     }
     // Leave WiFi connected if the user turned it on — the status-bar icon reflects it.
@@ -242,6 +262,7 @@ void WiFiSetupScreen::hide() {
 }
 
 void WiFiSetupScreen::updateStatusUi() {
+    updateNodesUi();
     auto& wm = WiFiManager::instance();
     auto& portal = ConfigPortal::instance();
     bool canAp = ConfigManager::instance().config().permissions.settings == "full" &&
@@ -299,6 +320,11 @@ void WiFiSetupScreen::updateStatusUi() {
         lv_obj_add_flag(_checkBtn, LV_OBJ_FLAG_HIDDEN);
     }
 
+    if (NodeDirectoryDownload::instance().busy()) {
+        lv_obj_add_state(_checkBtn,LV_STATE_DISABLED);
+        lv_obj_add_state(_apBtn,LV_STATE_DISABLED);
+    } else lv_obj_clear_state(_checkBtn,LV_STATE_DISABLED);
+
     // WiFi companion row — only operable while WiFi is connected.
     auto& comp = CompanionService::instance();
     if (connected) {
@@ -333,8 +359,38 @@ void WiFiSetupScreen::updateStatusUi() {
         // Always reachable — a stored preference, not a live-connection action.
         lv_group_add_obj(grp, _autoUpdateSwitch);
         if (connected) lv_group_add_obj(grp, _checkBtn);
+        lv_group_add_obj(grp,_nodesBtn);
         lv_group_add_obj(grp, _backBtn);
     }
+}
+
+void WiFiSetupScreen::updateNodesUi() {
+    auto& download = NodeDirectoryDownload::instance();
+    const auto state = download.state();
+    _nodesLastState = int(state); _nodesLastProgress = download.progress();
+    lv_label_set_text(_nodesButtonLabel,t(download.busy() ? "nodes_cancel" : "nodes_download"));
+    const bool usable = download.busy() || (WiFiManager::instance().isConnected() &&
+                         !ConfigPortal::instance().active() && SDCard::instance().isMounted());
+    if (usable) lv_obj_clear_state(_nodesBtn,LV_STATE_DISABLED);
+    else lv_obj_add_state(_nodesBtn,LV_STATE_DISABLED);
+    char text[220];
+    if (state == NodeDirectoryDownload::State::Running || state == NodeDirectoryDownload::State::Ready)
+        snprintf(text,sizeof text,tf("nodes_progress"),unsigned(download.progress()));
+    else if (state == NodeDirectoryDownload::State::Saving) snprintf(text,sizeof text,"%s",t("nodes_saving"));
+    else if (state == NodeDirectoryDownload::State::Saved)
+        snprintf(text,sizeof text,tf("nodes_saved"),unsigned(download.savedCount()));
+    else if (state == NodeDirectoryDownload::State::Failed) {
+        const char* key = download.error() == NodeDirectoryDownload::Error::Storage ? "nodes_storage" :
+                          download.error() == NodeDirectoryDownload::Error::Cancelled ? "nodes_cancelled" : "nodes_failed";
+        snprintf(text,sizeof text,"%s",t(key));
+    } else snprintf(text,sizeof text,tf("nodes_count"),unsigned(NodeDirectory::instance().table().count()));
+    lv_label_set_text(_nodesStatus,text);
+}
+void WiFiSetupScreen::nodesBtnCb(lv_event_t* event) {
+    auto& download = NodeDirectoryDownload::instance();
+    if (download.busy()) download.cancel();
+    else download.start();
+    static_cast<WiFiSetupScreen*>(lv_event_get_user_data(event))->updateStatusUi();
 }
 
 void WiFiSetupScreen::clearList() {

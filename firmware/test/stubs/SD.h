@@ -1,6 +1,9 @@
 // Stub SD.h for native tests
 #pragma once
 
+#ifdef NODE_DIRECTORY_STORAGE_TEST
+#include "../test_native/test_node_directory/MemorySD.h"
+#else
 class File {
 public:
     operator bool() const { return false; }
@@ -12,3 +15,5 @@ public:
     const char* name() const { return ""; }
     size_t size() const { return 0; }
 };
+
+#endif

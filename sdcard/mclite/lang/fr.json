@@ -1,5 +1,5 @@
 {
-    "version": 64,
+    "version": 65,
     "no_sd_title": "Pas de carte SD",
     "no_sd_msg": "Inserer une carte SD avec config.json\net redemarrer.\n\nUtilisez l'outil MCLite Config Tool\npour creer votre configuration.",
     "setup_title": "Configuration requise",
@@ -366,5 +366,14 @@
     "air_axis": "RSSI: -140..-20 dBm | 9,6 s | RX: dBm/dB",
     "air_waiting": "Attente de paquets radio...",
     "air_offline": "radio indisponible",
-    "air_help": "Canal actuel uniquement, sans balayage ni changement de frequence. Le mesh continue.\n\nCourbe: RSSI instantane toutes les 100 ms sur 9,6 secondes, ancien a gauche. Les trous indiquent TX, pause ou mesure invalide. Les impulsions breves peuvent manquer. Ce n'est pas une mesure calibree du bruit ou de l'occupation.\n\nPoints: RSSI des paquets. ADV vert, CH cyan, DM orange, ACK jaune, autres gris. TX violet en haut, echecs rouges, sans RSSI/SNR de reception.\n\nListe: quatre derniers paquets, RSSI dBm / SNR dB, octets, age en secondes. Types issus des en-tetes, sans verification du contenu. Doublons et trafic tiers inclus, erreurs CRC exclues.\n\nRX/TX/! comptent receptions, emissions terminees et echecs de la session. Reset ou reouverture remet a zero. Pause si ecran attenue ou verrouille, arret en quittant. Aucune ecriture SD."
+    "air_help": "Canal actuel uniquement, sans balayage ni changement de frequence. Le mesh continue.\n\nCourbe: RSSI instantane toutes les 100 ms sur 9,6 secondes, ancien a gauche. Les trous indiquent TX, pause ou mesure invalide. Les impulsions breves peuvent manquer. Ce n'est pas une mesure calibree du bruit ou de l'occupation.\n\nPoints: RSSI des paquets. ADV vert, CH cyan, DM orange, ACK jaune, autres gris. TX violet en haut, echecs rouges, sans RSSI/SNR de reception.\n\nListe: quatre derniers paquets, RSSI dBm / SNR dB, octets, age en secondes. Types issus des en-tetes, sans verification du contenu. Doublons et trafic tiers inclus, erreurs CRC exclues.\n\nRX/TX/! comptent receptions, emissions terminees et echecs de la session. Reset ou reouverture remet a zero. Pause si ecran attenue ou verrouille, arret en quittant. Aucune ecriture SD.",
+    "nodes_download": "Telecharger les noeuds",
+    "nodes_cancel": "Annuler le telechargement",
+    "nodes_progress": "Noeuds : %u identites chargees",
+    "nodes_saving": "Enregistrement des noeuds sur SD...",
+    "nodes_saved": "Repertoire enregistre : %u identites",
+    "nodes_count": "Repertoire hors ligne : %u identites. Source : CarinthiaMesh",
+    "nodes_failed": "Echec (WiFi/HTTPS/donnees/limite). Ancien repertoire conserve.",
+    "nodes_storage": "Echec SD. Anciennes donnees conservees en RAM ; verifier SD.",
+    "nodes_cancelled": "Annule. Ancien repertoire conserve."
 }

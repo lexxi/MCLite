@@ -2,6 +2,16 @@
 
 Dieses Dokument beschreibt unsere Änderungen. Das geerbte [CHANGELOG.md](CHANGELOG.md) dokumentiert die Upstream-Entwicklung.
 
+## 0.4.6-ap.8
+
+- Manueller HTTPS-Download des CarinthiaMesh-Knotenverzeichnisses im WLAN-Menü, mit Fortschritt und Abbruch.
+- Vollständige API-Paginierung nach `has_more`, Schlüssel-/Positionsprüfung und feste Grenzen; bisheriger Bestand bleibt bei Abruffehlern erhalten.
+- PSRAM-Verzeichnis als JSONL auf SD, schrittweise Speicherung und Backup-Wiederherstellung; nach Neustart offline verfügbar.
+- Pfadresolver berücksichtigt importierte vollständige Schlüssel inklusive Kandidaten ohne GPS; Datenbankpositionen nur als Fallback.
+- Sichtbare Datenbank-Repeater auf der Karte als D/[DB] markiert, ohne Kontakt- oder Funkroutenimport.
+- Sprachdateien und Config-Tool synchronisiert; [Bedienung und Grenzen](docs/node-directory.md).
+- Host-Tests und Live-API-Parserprüfung; Firmware-Build und Gerätetest noch offen.
+
 ## 0.4.6-ap.7
 
 - AirView unter Einstellungen → Radio: Live-RSSI-Kurve (9,6 Sekunden), Pakettypen, RSSI/SNR, RX-/TX-/Fehlerzähler und die vier neuesten Ereignisse.

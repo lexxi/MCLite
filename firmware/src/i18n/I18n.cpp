@@ -9,6 +9,17 @@
 namespace mclite {
 
 const DefaultString DEFAULT_STRINGS[] = {
+    // On-demand public node directory
+    {"nodes_download", "Download node directory"},
+    {"nodes_cancel", "Cancel node download"},
+    {"nodes_progress", "Node directory: %u identities loaded"},
+    {"nodes_saving", "Saving node directory to SD..."},
+    {"nodes_saved", "Directory saved: %u identities"},
+    {"nodes_count", "Offline directory: %u identities. Source: CarinthiaMesh"},
+    {"nodes_failed", "Download failed (WiFi/HTTPS/data/limit). Previous directory unchanged."},
+    {"nodes_storage", "SD save failed. Previous directory remains in RAM; check SD."},
+    {"nodes_cancelled", "Cancelled. Previous directory unchanged."},
+
     // Local radio diagnostics
     {"air_axis", "RSSI: -140..-20 dBm | 9.6 s | RX: dBm/dB"},
     {"air_waiting", "Waiting for radio packets..."},
