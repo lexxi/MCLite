@@ -111,6 +111,44 @@ Bleibt die Karte nach Abschluss weiß: Häkchen beim gewünschten Layer setzen
 und per Rechtsklick **Auf Layer zoomen** wählen. Ggf. andere Layer vorübergehend
 ausschalten. Die Attributtabelle zeigt, ob Objekte vorhanden sind.
 
+### Automatischer Export der drei Layer (QGIS 3.40)
+
+Statt der drei manuellen Exporte kann [export_gpkg_qgis.py](../tools/maps/export_gpkg_qgis.py)
+die Tabellen `points`, `lines` und `multipolygons` direkt aus einer OSM-PBF-Datei
+in ein gemeinsames GeoPackage schreiben. Es wird lokal gearbeitet; kein API-Schlüssel nötig.
+
+Für Österreich:
+
+1. Im Repository `git pull --ff-only` ausführen.
+2. Das aktuelle QGIS-Projekt speichern und ein **neues, leeres Projekt** öffnen.
+3. Die heruntergeladene Datei muss unter
+   `C:\pyprojects\MCLite-Maps\source\austria-latest.osm.pbf` liegen.
+4. Mit **Strg+Alt+P** die QGIS-Python-Konsole öffnen und diese **eine Zeile** ausführen:
+
+```python
+exec(compile(open(r"C:\pyprojects\MCLite\tools\maps\export_gpkg_qgis.py", encoding="utf-8").read(), "export_gpkg_qgis.py", "exec"))
+```
+
+Das Skript erzeugt `C:\pyprojects\MCLite-Maps\source\oesterreich-auto.gpkg`.
+Eine vorhandene Zieldatei führt zum Abbruch; sie wird nicht überschrieben.
+Für andere Dateien die Konstanten `SOURCE` und `OUTPUT` am Skriptanfang ändern.
+Die PBF muss vorher nicht als Layer geladen werden. Filter und Auswahl eines
+bestehenden Projekts beeinflussen den Export nicht. Es werden alle Geometrien
+der drei Quelltabellen übernommen, ohne räumlichen Zuschnitt.
+
+Die Konsole meldet Beginn und Ende jedes Layers. Dazwischen kann QGIS lange
+beschäftigt sein und nicht reagieren. Der Export läuft nacheinander und ist
+nicht automatisch schneller als die manuelle Variante. Ausreichend freien
+Speicherplatz für das GeoPackage und temporäre OSM-Verarbeitung vorsehen.
+
+Erst nach drei erfolgreichen Exporten erhält die temporäre Datei den endgültigen
+Namen. Bei Fehlern bleibt eine Datei `oesterreich-auto.partial-….gpkg` zur Prüfung
+liegen; sie wird nicht automatisch fortgesetzt. Die fertigen drei Layer werden
+mit ausgeschalteter Sichtbarkeit geladen. Danach das Projekt speichern und die
+Darstellung wie unten einrichten. **Das vorhandene Styling-Skript setzt zunächst
+den Kärnten-Ausschnitt; für Österreich anschließend den Exportausschnitt explizit
+auf West 9,5 / Ost 17,2 / Süd 46,3 / Nord 49,1 (EPSG:4326) setzen.**
+
 ### 2. GeoPackage als Arbeitsdatei erzeugen
 
 Direkter PBF-Zugriff war bei uns langsam. Deshalb werden drei Layer einmalig
