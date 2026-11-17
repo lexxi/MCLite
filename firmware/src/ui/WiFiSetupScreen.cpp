@@ -451,6 +451,7 @@ void WiFiSetupScreen::rebuildList() {
 
     _netCount = WiFiManager::instance().scan(_nets, MAX_NETS);
     updateStatusUi();   // restore "Off"/connected text after the scan
+    if (_netCount == 0) UIManager::instance().showToast(t("wifi_scan_empty"));
 
     lv_group_t* grp = UIManager::instance().inputGroup();
     for (int i = 0; i < _netCount; i++) {
@@ -689,9 +690,19 @@ void WiFiSetupScreen::switchCb(lv_event_t* e) {
             self->_selFromSaved = true;
             lv_async_call(connectAsyncCb, self);   // connect to saved network
         } else {
-            // No saved network — revert the switch and let them pick from the list.
+            // No saved credentials: switching on means scan/select, not an
+            // immediate "no networks" verdict. Defer the blocking scan outside
+            // the switch callback so the scanning label can be rendered first.
             lv_obj_clear_state(self->_switch, LV_STATE_CHECKED);
-            UIManager::instance().showToast(t("wifi_scan_empty"));
+            lv_async_call([](void* user) {
+                auto* screen = static_cast<WiFiSetupScreen*>(user);
+                if (!screen->_screen || lv_obj_has_flag(screen->_screen,LV_OBJ_FLAG_HIDDEN)) return;
+                screen->rebuildList();
+                if (screen->_netCount > 0) {
+                    auto* first = lv_obj_get_child(screen->_list,0);
+                    if (first) lv_obj_scroll_to_view(first,LV_ANIM_ON);
+                }
+            },self);
         }
     } else {
         self->doDisconnect();
