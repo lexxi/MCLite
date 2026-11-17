@@ -9,6 +9,8 @@
 namespace mclite {
 
 const DefaultString DEFAULT_STRINGS[] = {
+    {"wifi_scan_failed", "WiFi scan failed"},
+
     // Manual German language-file refresh
     {"lang_download_de", "Download German (de.json)"},
     {"lang_download_busy", "Downloading and checking de.json..."},

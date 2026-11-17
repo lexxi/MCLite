@@ -12,34 +12,64 @@ WiFiManager& WiFiManager::instance() {
 }
 
 int WiFiManager::scan(ScannedNetwork* out, int maxOut) {
+    _lastScanResult = 0; _scanDriverStatus.store(-1); _scanDriverCount.store(-1);
     if (!out || maxOut <= 0) return 0;
-
-    WiFi.mode(WIFI_STA);
-    WiFi.disconnect(false, true);  // clear stale state
-    delay(100);
-
-    int n = WiFi.scanNetworks();   // blocking
+    if (!_scanEventRegistered) {
+        WiFi.onEvent([this](arduino_event_id_t, arduino_event_info_t info) {
+            if (!_collectScanEvent.load()) return;
+            _scanDriverCount.store(info.wifi_scan_done.number);
+            _scanDriverStatus.store(info.wifi_scan_done.status);
+        },ARDUINO_EVENT_WIFI_SCAN_DONE);
+        _scanEventRegistered = true;
+    }
+    // Scanning is an explicit network-selection action, not background reconnect.
+    // Start from a stopped driver and do not erase saved credentials during scan.
+    _wantOn = false;
+    WiFi.persistent(false);
+    WiFi.setAutoReconnect(false);
+    _collectScanEvent.store(false);
+    WiFi.scanComplete(); // lets Arduino clear a timed-out previous scan flag
+    WiFi.mode(WIFI_OFF);
+    delay(150);
+    WiFi.scanDelete();
+    if (!WiFi.mode(WIFI_STA)) {
+        _lastScanResult = -3;
+        LOGLN("[WiFi] Scan: STA startup failed");
+        return 0;
+    }
+    WiFi.setSleep(false);
+    delay(250);
+    _collectScanEvent.store(true);
+    const int n = WiFi.scanNetworks(false,true,false,300,0); // all allowed 2.4-GHz channels, include hidden
+    _lastScanResult = n;
+    // Arduino releases its blocking wait before user event callbacks necessarily
+    // finish. Give the diagnostic callback a short bounded opportunity to publish.
+    for (unsigned i = 0; i < 20 && _scanDriverStatus.load() < 0 && n >= 0; ++i) delay(5);
+    _collectScanEvent.store(false);
+    LOGF("[WiFi] Scan result=%d driver=%d AP=%d mode=%d\n",n,lastScanDriverStatus(),lastScanAccessPoints(),int(WiFi.getMode()));
     if (n <= 0) { WiFi.scanDelete(); return 0; }
 
     int count = 0;
-    for (int i = 0; i < n && count < maxOut; ++i) {
-        String s = WiFi.SSID(i);
-        if (s.length() == 0) continue;            // skip hidden / unnamed
-        bool dup = false;                          // collapse duplicate SSIDs (keep strongest)
-        for (int j = 0; j < count; ++j) {
-            if (out[j].ssid == s) { dup = true; break; }
+    for (int i = 0; i < n; ++i) {
+        const String ssid = WiFi.SSID(i);
+        if (ssid.length() == 0) continue; // no selectable SSID for a hidden AP
+        const int32_t rssi = WiFi.RSSI(i);
+        int slot = -1;
+        for (int j = 0; j < count; ++j) if (out[j].ssid == ssid) { slot = j; break; }
+        if (slot >= 0) {
+            if (rssi <= out[slot].rssi) continue;
+        } else if (count < maxOut) slot = count++;
+        else {
+            slot = 0;
+            for (int j = 1; j < count; ++j) if (out[j].rssi < out[slot].rssi) slot = j;
+            if (rssi <= out[slot].rssi) continue;
         }
-        if (dup) continue;
-        out[count].ssid = s;
-        out[count].rssi = WiFi.RSSI(i);
-        out[count].open = (WiFi.encryptionType(i) == WIFI_AUTH_OPEN);
-        count++;
+        out[slot].ssid = ssid;
+        out[slot].rssi = rssi;
+        out[slot].open = WiFi.encryptionType(i) == WIFI_AUTH_OPEN;
     }
     WiFi.scanDelete();
-
-    std::sort(out, out + count, [](const ScannedNetwork& a, const ScannedNetwork& b) {
-        return a.rssi > b.rssi;  // strongest first
-    });
+    std::sort(out,out + count,[](const ScannedNetwork& a,const ScannedNetwork& b) { return a.rssi > b.rssi; });
     return count;
 }
 

@@ -1,5 +1,5 @@
 {
-    "version": 66,
+    "version": 67,
     "no_sd_title": "Nessuna scheda SD",
     "no_sd_msg": "Inserire una scheda SD con config.json\ne riavviare.\n\nUsare il MCLite Config Tool\nper creare la configurazione.",
     "setup_title": "Configurazione necessaria",
@@ -379,5 +379,6 @@
     "lang_download_de": "Scarica tedesco (de.json)",
     "lang_download_busy": "Download e verifica de.json...",
     "lang_download_saved": "de.json salvato. Riavviare per applicare.",
-    "lang_download_failed": "Download/salvataggio fallito o file incompatibile. Lingua precedente conservata."
+    "lang_download_failed": "Download/salvataggio fallito o file incompatibile. Lingua precedente conservata.",
+    "wifi_scan_failed": "Scansione WiFi fallita"
 }

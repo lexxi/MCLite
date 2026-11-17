@@ -451,7 +451,20 @@ void WiFiSetupScreen::rebuildList() {
 
     _netCount = WiFiManager::instance().scan(_nets, MAX_NETS);
     updateStatusUi();   // restore "Off"/connected text after the scan
-    if (_netCount == 0) UIManager::instance().showToast(t("wifi_scan_empty"));
+    if (_netCount == 0) {
+        auto& wifi = WiFiManager::instance();
+        char detail[200];
+        snprintf(detail,sizeof detail,"%s\nScan:%d Driver:%d AP:%d",
+                 t(wifi.scanFailed() ? "wifi_scan_failed" : "wifi_scan_empty"),
+                 wifi.lastScanResult(),wifi.lastScanDriverStatus(),wifi.lastScanAccessPoints());
+        auto* label = lv_label_create(_list);
+        lv_obj_set_width(label,LV_PCT(100));
+        lv_obj_set_style_text_font(label,FONT_BODY,0);
+        lv_obj_set_style_text_color(label,theme::TEXT_PRIMARY(),0);
+        lv_label_set_long_mode(label,LV_LABEL_LONG_WRAP);
+        lv_label_set_text(label,detail);
+        lv_obj_scroll_to_view(label,LV_ANIM_ON);
+    }
 
     lv_group_t* grp = UIManager::instance().inputGroup();
     for (int i = 0; i < _netCount; i++) {

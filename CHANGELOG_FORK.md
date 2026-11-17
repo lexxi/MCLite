@@ -2,6 +2,13 @@
 
 Dieses Dokument beschreibt unsere Änderungen. Das geerbte [CHANGELOG.md](CHANGELOG.md) dokumentiert die Upstream-Entwicklung.
 
+## 0.4.6-ap.10
+
+- WLAN-Auswahl startet den Treiber im STA-Modus neu, ohne Zugangsdaten zu löschen; automatisches Wiederverbinden während der Auswahl ausgeschaltet.
+- Arduino-Scanergebnis, IDF-Scanstatus und AP-Anzahl sichtbar in der Netzliste; fehlgeschlagene Scans nicht mehr als reine Leermeldung behandeln.
+- Stärkste Ausprägung je SSID und stärkste Netze bei vollem Listenlimit behalten.
+- Fünf neue Host-Tests mit WiFi-Treiberdouble; [Diagnoseanleitung](docs/wifi-scan.md). Hardwareursache weiterhin offen, Firmware-Build und Gerätetest nötig.
+
 ## 0.4.6-ap.9
 
 - `de.json` im WLAN-Menü direkt aus dem konfigurierten GitHub-Repo laden; kein SD-Ausbau und kein Release-Tag nötig.
