@@ -204,13 +204,15 @@ void WiFiSetupScreen::create(lv_obj_t* parent) {
     // Scrollable network list (shown when not connected)
     _list = lv_obj_create(cont);
     lv_obj_set_size(_list, LV_PCT(100), LV_SIZE_CONTENT);
-    lv_obj_set_flex_grow(_list, 1);
+    // Let the outer window scroll. A grow item gets zero height when the
+    // WiFi/download controls already consume the whole T-Deck viewport.
+    lv_obj_set_flex_grow(_list, 0);
     lv_obj_set_style_bg_opa(_list, LV_OPA_0, 0);
     lv_obj_set_style_border_width(_list, 0, 0);
     lv_obj_set_style_pad_all(_list, 0, 0);
     lv_obj_set_style_pad_row(_list, theme::PAD_SMALL, 0);
     lv_obj_set_flex_flow(_list, LV_FLEX_FLOW_COLUMN);
-    lv_obj_add_flag(_list, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_clear_flag(_list, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_scroll_dir(_list, LV_DIR_VER);
 
     lv_obj_add_flag(_screen, LV_OBJ_FLAG_HIDDEN);
@@ -508,7 +510,19 @@ void WiFiSetupScreen::rebuildList() {
 
         if (grp) lv_group_add_obj(grp, row);
     }
-    if (grp && _netCount > 0) lv_group_focus_obj(lv_obj_get_child(_list, 0));
+    if (_netCount > 0) {
+        auto& wifi = WiFiManager::instance();
+        lv_label_set_long_mode(_statusLabel,LV_LABEL_LONG_WRAP);
+        lv_label_set_text_fmt(_statusLabel,"WLAN: %d\nScan:%d Driver:%d AP:%d",
+                             _netCount,wifi.lastScanResult(),
+                             wifi.lastScanDriverStatus(),wifi.lastScanAccessPoints());
+        lv_obj_update_layout(_screen);
+        auto* first = lv_obj_get_child(_list,0);
+        if (first) {
+            if (grp) lv_group_focus_obj(first);
+            lv_obj_scroll_to_view(first,LV_ANIM_OFF);
+        }
+    }
 }
 
 void WiFiSetupScreen::openPasswordEntry(const String& ssid) {
