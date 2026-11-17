@@ -58,6 +58,8 @@ lv_obj_t* ModalDialog::show(const String& title, const String& body,
     lv_obj_clear_flag(panel, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_user_data(panel, ctx);
 
+    lv_obj_t* bodyContainer = nullptr;
+
     if (title.length()) {
         lv_obj_t* lbl = lv_label_create(panel);
         lv_obj_set_width(lbl, LV_PCT(100));
@@ -71,6 +73,7 @@ lv_obj_t* ModalDialog::show(const String& title, const String& body,
     if (body.length() || smallTail.length()) {
         // Scrollable container so long bodies (telemetry/advert detail) fit.
         lv_obj_t* bc = lv_obj_create(panel);
+        bodyContainer = bc;
         lv_obj_set_width(bc, LV_PCT(100));
         lv_obj_set_height(bc, LV_SIZE_CONTENT);
         lv_obj_set_style_max_height(bc, 150, 0);
@@ -105,6 +108,7 @@ lv_obj_t* ModalDialog::show(const String& title, const String& body,
     for (size_t i = 0; i < buttons.size(); i++) {
         lv_obj_t* b = lv_btn_create(panel);
         lv_obj_set_width(b, LV_PCT(100));
+        lv_obj_set_height(b, LV_SIZE_CONTENT);
         lv_obj_set_style_bg_color(b, theme::BG_INPUT(), 0);
         lv_obj_set_style_bg_color(b, theme::ACCENT(), LV_STATE_FOCUSED);
         lv_obj_set_user_data(b, (void*)(intptr_t)i);
@@ -115,6 +119,35 @@ lv_obj_t* ModalDialog::show(const String& title, const String& body,
         lv_label_set_text(lbl, buttons[i].c_str());
         lv_obj_center(lbl);
         lv_group_add_obj(ctx->group, b);
+    }
+
+    // Reserve the measured title/button heights before limiting the scrollable
+    // body. A fixed 150 px body plus two buttons exceeds the T-Deck's card.
+    if (bodyContainer) {
+        lv_obj_update_layout(panel);
+        const int limit = Display::height() - 2 * theme::PAD_MEDIUM;
+        const int border = lv_obj_get_style_border_width(panel,0);
+        int reserved = lv_obj_get_style_pad_top(panel,0)
+                     + lv_obj_get_style_pad_bottom(panel,0) + 2 * border;
+        const uint32_t children = lv_obj_get_child_cnt(panel);
+        if (children > 1) reserved += (children - 1) * lv_obj_get_style_pad_row(panel,0);
+        for (uint32_t i = 0; i < children; ++i) {
+            auto* child = lv_obj_get_child(panel,i);
+            if (child != bodyContainer) reserved += lv_obj_get_height(child);
+        }
+        int bodyHeight = limit - reserved;
+        if (bodyHeight > 150) bodyHeight = 150;
+        if (bodyHeight < 24) {
+            bodyHeight = 24;
+            // Unusually many buttons cannot all fit at once; let the card
+            // scroll instead of permanently clipping the final controls.
+            lv_obj_add_flag(panel,LV_OBJ_FLAG_SCROLLABLE);
+            lv_obj_set_scroll_dir(panel,LV_DIR_VER);
+            lv_obj_set_scrollbar_mode(panel,LV_SCROLLBAR_MODE_AUTO);
+            lv_obj_set_flex_align(panel,LV_FLEX_ALIGN_START,LV_FLEX_ALIGN_CENTER,LV_FLEX_ALIGN_CENTER);
+        }
+        lv_obj_set_style_max_height(bodyContainer,bodyHeight,0);
+        lv_obj_update_layout(panel);
     }
 
     UIManager::instance().switchToModalGroup(panel);
