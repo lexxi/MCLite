@@ -9,6 +9,12 @@
 namespace mclite {
 
 const DefaultString DEFAULT_STRINGS[] = {
+    // Manual German language-file refresh
+    {"lang_download_de", "Download German (de.json)"},
+    {"lang_download_busy", "Downloading and checking de.json..."},
+    {"lang_download_saved", "de.json saved. Restart to apply."},
+    {"lang_download_failed", "Language download/save failed or file incompatible. Previous language kept."},
+
     // On-demand public node directory
     {"nodes_download", "Download node directory"},
     {"nodes_cancel", "Cancel node download"},
@@ -432,6 +438,25 @@ I18n& I18n::instance() {
     return inst;
 }
 
+bool I18n::validateDownload(const String& json, int minimumVersion) {
+    if (json.length() == 0 || json.length() > 32768) return false;
+    JsonDocument doc;
+    if (deserializeJson(doc,json) || !doc.is<JsonObject>() || !doc["version"].is<int>()) return false;
+    if (doc["version"].as<int>() < minimumVersion) return false;
+    size_t count = 0;
+    for (JsonPairConst field : doc.as<JsonObjectConst>()) {
+        if (!strcmp(field.key().c_str(),"version")) continue;
+        if (!field.value().is<const char*>() || ++count > MAX_STRINGS) return false;
+    }
+    // Complete coverage and exact format agreement prevent a stale/incompatible
+    // main-branch file being accepted by older firmware.
+    for (size_t i = 0; DEFAULT_STRINGS[i].key; ++i) {
+        JsonVariantConst value = doc[DEFAULT_STRINGS[i].key];
+        if (!value.is<const char*>() || !formatSpecsMatch(DEFAULT_STRINGS[i].en,value.as<const char*>())) return false;
+    }
+    return true;
+}
+
 void I18n::init(const String& langCode) {
     // Scan available translation files
     _availableLangs = "en";
@@ -463,6 +488,8 @@ void I18n::init(const String& langCode) {
     String path = "/mclite/lang/" + langCode + ".json";
     auto& sd = SDCard::instance();
 
+    // Recover a language left at .bak by interrupted atomic promotion.
+    if (!sd.fileExists(path.c_str()) && sd.fileExists((path + ".bak").c_str())) path += ".bak";
     if (!sd.isMounted() || !sd.fileExists(path.c_str())) {
         LOGF("[I18n] Translation file %s not found, using English\n", path.c_str());
         return;

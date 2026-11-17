@@ -1,5 +1,8 @@
 #include "NodeDirectoryDownload.h"
 #include "WiFiManager.h"
+#include "../i18n/I18n.h"
+#include "../config/defaults.h"
+#include <SD.h>
 #include "../storage/NodeDirectory.h"
 #include "../storage/SDCard.h"
 #include "../util/DirectoryJson.h"
@@ -18,22 +21,39 @@ public:
     String text;
     bool overflow = false;
     static constexpr size_t CAP = 96 * 1024;
+    explicit BoundedBody(size_t limit = CAP) : _limit(limit) {}
     size_t write(uint8_t byte) override { return write(&byte,1); }
     size_t write(const uint8_t* data,size_t length) override {
-        if (length > CAP - text.length()) { overflow = true; return 0; }
+        if (length > _limit - text.length()) { overflow = true; return 0; }
         return text.concat(reinterpret_cast<const char*>(data),length) ? length : 0;
     }
     int available() override { return 0; }
     int read() override { return -1; }
     int peek() override { return -1; }
     void flush() override {}
+private:
+    size_t _limit;
 };
 }
 NodeDirectoryDownload& NodeDirectoryDownload::instance() { static NodeDirectoryDownload download; return download; }
-bool NodeDirectoryDownload::start() {
+bool NodeDirectoryDownload::start(Kind kind) {
     if (busy()) return false;
+    _kind.store(kind);
     if (!WiFiManager::instance().isConnected()) { fail(Error::Offline); return false; }
     if (!SDCard::instance().isMounted()) { fail(Error::Storage); return false; }
+    _language = String();
+    _minimumLanguageVersion = defaults::LANG_VERSION;
+    if (kind == Kind::German) {
+        auto& sd = SDCard::instance();
+        String path = "/mclite/lang/de.json";
+        if (!sd.fileExists(path.c_str())) path += ".bak";
+        JsonDocument current;
+        const String body = sd.readFile(path.c_str(),32768);
+        if (body.length() && !deserializeJson(current,body)) {
+            const int version = current["version"] | 0;
+            if (version > _minimumLanguageVersion) _minimumLanguageVersion = version;
+        }
+    }
     _pending.release(); _progress.store(0); _saved.store(0); _cancel.store(false); _error.store(Error::None);
     _state.store(State::Running);
     // Network/JSON work in a lower-priority task. All SD/SPI and UI stay on main.
@@ -44,10 +64,40 @@ void NodeDirectoryDownload::task(void* context) {
     auto* self = static_cast<NodeDirectoryDownload*>(context);
     const bool ok = self->fetch();
     if (ok) self->_state.store(State::Ready);
-    else { self->_pending.release(); self->_state.store(State::Failed); }
+    else { self->_pending.release(); self->_language = String(); self->_state.store(State::Failed); }
     vTaskDelete(nullptr);
 }
+bool NodeDirectoryDownload::fetchLanguage() {
+    auto stop = [this](Error error) { _error.store(error); return false; };
+    if (_cancel.load()) return stop(Error::Cancelled);
+    WiFiClientSecure tls;
+    tls.setCACertBundle(rootca_crt_bundle_start);
+    tls.setHandshakeTimeout(12);
+    HTTPClient http;
+    http.setConnectTimeout(10000); http.setTimeout(12000); http.useHTTP10(true);
+    http.setUserAgent("MCLite-language/1");
+    // Fork builds have no matching release tag. Fetch the configured repository's
+    // main file, then validate it against THIS firmware before accepting it.
+    const String url = String("https://raw.githubusercontent.com/") + MCLITE_REPO_OWNER + "/" + MCLITE_REPO_NAME + "/main/sdcard/mclite/lang/de.json?lang_version=" + String(defaults::LANG_VERSION);
+    if (!http.begin(tls,url)) return stop(Error::Network);
+    http.addHeader("Accept","application/json"); http.addHeader("Accept-Encoding","identity");
+    const int status = http.GET();
+    if (status != HTTP_CODE_OK) { http.end(); return stop(Error::Network); }
+    if (http.getSize() > 32768) { http.end(); return stop(Error::Limit); }
+    BoundedBody body(32768);
+    if (!body.text.reserve(32768)) { http.end(); return stop(Error::Memory); }
+    const int bytes = http.writeToStream(&body);
+    http.end();
+    if (_cancel.load()) return stop(Error::Cancelled);
+    if (body.overflow) return stop(Error::Limit);
+    if (bytes <= 0 || size_t(bytes) != body.text.length()) return stop(Error::Network);
+    if (!I18n::validateDownload(body.text,_minimumLanguageVersion)) return stop(Error::Format);
+    _language = std::move(body.text);
+    return true;
+}
+
 bool NodeDirectoryDownload::fetch() {
+    if (kind() == Kind::German) return fetchLanguage();
     auto stop = [this](Error error) { _error.store(error); return false; };
     if (!_pending.allocate()) return stop(Error::Memory);
     constexpr unsigned PAGE = 50, MAX_PAGES = 100;
@@ -91,7 +141,21 @@ void NodeDirectoryDownload::poll() {
     auto& directory = NodeDirectory::instance();
     if (_cancel.load()) {
         if (current == State::Saving) directory.cancelInstall();
-        _pending.release(); fail(Error::Cancelled); return;
+        _pending.release(); _language = String(); fail(Error::Cancelled); return;
+    }
+    if (kind() == Kind::German) {
+        auto& sd = SDCard::instance();
+        sd.mkdir("/mclite"); sd.mkdir("/mclite/lang");
+        const bool saved = sd.writeAtomic("/mclite/lang/de.json",_language);
+        _language = String();
+        if (!saved) {
+            if (!sd.fileExists("/mclite/lang/de.json") && sd.fileExists("/mclite/lang/de.json.bak"))
+                SD.rename("/mclite/lang/de.json.bak","/mclite/lang/de.json");
+            fail(Error::Storage); return;
+        }
+        // Do not reload while LVGL widgets/button maps may still refer to old
+        // translated strings. User reboots explicitly with the existing button.
+        _languageSaved.store(true); _state.store(State::Saved); return;
     }
     if (current == State::Ready) {
         if (!directory.beginInstall(_pending)) { _pending.release(); fail(Error::Storage); return; }

@@ -182,3 +182,9 @@ Mesh-Pakettypen mit RSSI/SNR auf dem eingestellten Kanal.
 Ab 0.4.6-ap.8: **WLAN → Knotenverzeichnis laden** importiert CarinthiaMesh-Daten
 per HTTPS auf SD. Pfad und Karte nutzen die vollständigen Kennungen offline.
 [Bedienung, Dateiformat und Grenzen](docs/node-directory.md).
+
+### Sprachdatei per WLAN (Fork)
+
+Ab 0.4.6-ap.9: **WLAN → de.json per WLAN laden** aktualisiert die deutsche
+Sprachdatei auf SD. Danach neu starten; kein Ausbau der SD-Karte nötig.
+[Bedienung](docs/wifi-language.md).

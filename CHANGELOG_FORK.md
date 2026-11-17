@@ -2,6 +2,14 @@
 
 Dieses Dokument beschreibt unsere Änderungen. Das geerbte [CHANGELOG.md](CHANGELOG.md) dokumentiert die Upstream-Entwicklung.
 
+## 0.4.6-ap.9
+
+- `de.json` im WLAN-Menü direkt aus dem konfigurierten GitHub-Repo laden; kein SD-Ausbau und kein Release-Tag nötig.
+- Hintergrunddownload mit 32-KiB-Grenze, Prüfung von Version, Vollständigkeit und printf-Formaten, anschließend atomare SD-Speicherung.
+- Gemeinsame Download-Steuerung verhindert überlappende Knoten-/Sprachdownloads; nach Erfolg bewusster Neustart, ohne live Übersetzungszeiger zu ersetzen.
+- Sprachloader unterstützt `.bak` bei unterbrochener Promotion; bestehende Sprachdatei wird nicht heruntergestuft.
+- Fünf neue Sprachdownload-/Backup-Tests; aktualisierte Sprachpakete und [Bedienungsanleitung](docs/wifi-language.md). Firmware-Build und Gerätetest noch offen.
+
 ## 0.4.6-ap.8
 
 - Manueller HTTPS-Download des CarinthiaMesh-Knotenverzeichnisses im WLAN-Menü, mit Fortschritt und Abbruch.

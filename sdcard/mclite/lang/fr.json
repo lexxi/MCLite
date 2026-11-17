@@ -1,5 +1,5 @@
 {
-    "version": 65,
+    "version": 66,
     "no_sd_title": "Pas de carte SD",
     "no_sd_msg": "Inserer une carte SD avec config.json\net redemarrer.\n\nUtilisez l'outil MCLite Config Tool\npour creer votre configuration.",
     "setup_title": "Configuration requise",
@@ -375,5 +375,9 @@
     "nodes_count": "Repertoire hors ligne : %u identites. Source : CarinthiaMesh",
     "nodes_failed": "Echec (WiFi/HTTPS/donnees/limite). Ancien repertoire conserve.",
     "nodes_storage": "Echec SD. Anciennes donnees conservees en RAM ; verifier SD.",
-    "nodes_cancelled": "Annule. Ancien repertoire conserve."
+    "nodes_cancelled": "Annule. Ancien repertoire conserve.",
+    "lang_download_de": "Telecharger allemand (de.json)",
+    "lang_download_busy": "Telechargement et verification de.json...",
+    "lang_download_saved": "de.json enregistre. Redemarrer pour appliquer.",
+    "lang_download_failed": "Echec du telechargement/enregistrement ou fichier incompatible. Ancienne langue conservee."
 }

@@ -18,6 +18,9 @@ public:
     lv_obj_t* obj() { return _screen; }
 
 private:
+    lv_obj_t* _langBtn = nullptr;
+    lv_obj_t* _langButtonLabel = nullptr;
+    static void langBtnCb(lv_event_t* event);
     lv_obj_t* _nodesBtn = nullptr;
     lv_obj_t* _nodesButtonLabel = nullptr;
     lv_obj_t* _nodesStatus = nullptr;

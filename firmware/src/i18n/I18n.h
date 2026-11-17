@@ -34,6 +34,8 @@ public:
     // -- the earlier `> 0` test skipped exactly the oldest files.
     bool langNeedsRefresh() const { return _count > 0 &&
                                            _langFileVersion < (int)defaults::LANG_VERSION; }
+    // Worker-safe: checks only the immutable English table, never live UI strings.
+    static bool validateDownload(const String& json, int minimumVersion);
     int  langFileVersion() const { return _langFileVersion; }
 
     const String& currentLanguage() const { return _currentLang; }

@@ -6,9 +6,9 @@ speichern. Nach Neustart steht es ohne Internet zur Verfügung.
 
 ## Bedienung am T-Deck
 
-1. Firmware aktualisieren und die neue `sdcard/mclite/lang/de.json` nach
-   `/mclite/lang/de.json` auf die SD kopieren. Ohne Aktualisierung der Sprachdatei
-   erscheinen neue Beschriftungen auf Englisch.
+1. Firmware aktualisieren. Ab 0.4.6-ap.9 lässt sich die deutsche Sprachdatei
+   über **WLAN → de.json per WLAN laden** aktualisieren, danach neu starten.
+   Mit alter Datei erscheinen neue Beschriftungen zunächst auf Englisch.
 2. Admin-Menü mit **0** oder dem Zahnrad öffnen, dann **WiFi/WLAN** öffnen.
 3. Mit einem bestehenden WLAN mit Internetzugang verbinden. Der **Config-AP**
    ist für Uploads vom PC; er stellt selbst keine Internetverbindung her.

@@ -1,5 +1,5 @@
 {
-    "version": 65,
+    "version": 66,
     "no_sd_title": "Keine SD-Karte",
     "no_sd_msg": "SD-Karte mit config.json einlegen\nund neu starten.\n\nVerwenden Sie das MCLite Config Tool\num Ihre Konfiguration zu erstellen.",
     "setup_title": "Einrichtung erforderlich",
@@ -375,5 +375,9 @@
     "nodes_count": "Offline-Verzeichnis: %u Kennungen. Quelle: CarinthiaMesh",
     "nodes_failed": "Download fehlgeschlagen (WLAN/HTTPS/Daten/Limit). Bisheriges Verzeichnis bleibt erhalten.",
     "nodes_storage": "SD-Speicherung fehlgeschlagen. Bisherige Daten bleiben im RAM; SD pr\u00fcfen.",
-    "nodes_cancelled": "Abgebrochen. Bisheriges Verzeichnis bleibt erhalten."
+    "nodes_cancelled": "Abgebrochen. Bisheriges Verzeichnis bleibt erhalten.",
+    "lang_download_de": "de.json per WLAN laden",
+    "lang_download_busy": "de.json wird geladen und gepr\u00fcft...",
+    "lang_download_saved": "de.json gespeichert. Zum \u00dcbernehmen neu starten.",
+    "lang_download_failed": "Sprachdownload/Speicherung fehlgeschlagen oder Datei nicht kompatibel. Bisherige Sprache bleibt erhalten."
 }

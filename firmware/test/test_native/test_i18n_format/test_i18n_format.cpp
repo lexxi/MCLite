@@ -17,10 +17,11 @@ static SDStub SD;
 #include "i18n/I18n.cpp"
 
 // I18n reads the lang JSON through SDCard; these tests never load one.
+static String backupLanguage;
 namespace mclite {
-    SDCard& SDCard::instance() { static SDCard inst; return inst; }
-    bool SDCard::fileExists(const char*) { return false; }
-    String SDCard::readFile(const char*, size_t) { return ""; }
+    SDCard& SDCard::instance() { static SDCard inst; inst._mounted = true; return inst; }
+    bool SDCard::fileExists(const char* path) { return backupLanguage.length() && !strcmp(path,"/mclite/lang/de.json.bak"); }
+    String SDCard::readFile(const char* path, size_t) { return !strcmp(path,"/mclite/lang/de.json.bak") ? backupLanguage : String(); }
 }
 
 using namespace mclite;
@@ -111,6 +112,55 @@ void test_english_defaults_have_parseable_specifiers() {
     }
 }
 
+static String completeDownload(int version = defaults::LANG_VERSION) {
+    JsonDocument doc;
+    doc["version"] = version;
+    for (size_t i=0; DEFAULT_STRINGS[i].key; ++i) doc[DEFAULT_STRINGS[i].key] = DEFAULT_STRINGS[i].en;
+    String text; serializeJson(doc,text); return text;
+}
+void test_language_download_complete_and_no_downgrade() {
+    String text = completeDownload();
+    TEST_ASSERT_TRUE(I18n::validateDownload(text,defaults::LANG_VERSION));
+    TEST_ASSERT_FALSE(I18n::validateDownload(text,defaults::LANG_VERSION + 1));
+    TEST_ASSERT_FALSE(I18n::validateDownload(completeDownload(defaults::LANG_VERSION-1),defaults::LANG_VERSION));
+}
+void test_language_download_rejects_bad_json_shape_and_size() {
+    TEST_ASSERT_FALSE(I18n::validateDownload("broken",0));
+    TEST_ASSERT_FALSE(I18n::validateDownload("[]",0));
+    TEST_ASSERT_FALSE(I18n::validateDownload(String(std::string(32769,' ').c_str()),0));
+    JsonDocument doc;
+    deserializeJson(doc,completeDownload()); doc["version"] = "66";
+    String text; serializeJson(doc,text);
+    TEST_ASSERT_FALSE(I18n::validateDownload(text,0));
+}
+void test_language_download_requires_all_keys_and_safe_formats() {
+    JsonDocument doc;
+    deserializeJson(doc,completeDownload()); doc.remove("wifi_setup_title");
+    String text; serializeJson(doc,text);
+    TEST_ASSERT_FALSE(I18n::validateDownload(text,0));
+    deserializeJson(doc,completeDownload()); doc["sos_sent"] = "Bad %s";
+    text = ""; serializeJson(doc,text);
+    TEST_ASSERT_FALSE(I18n::validateDownload(text,0));
+}
+void test_language_download_rejects_non_strings_and_overflow() {
+    JsonDocument doc;
+    deserializeJson(doc,completeDownload()); doc["future_key"] = 42;
+    String text; serializeJson(doc,text);
+    TEST_ASSERT_FALSE(I18n::validateDownload(text,0));
+    doc.remove("future_key");
+    for (unsigned i=0; i<401; ++i) doc[String("extra_")+String(i)] = "extra";
+    text = ""; serializeJson(doc,text);
+    TEST_ASSERT_FALSE(I18n::validateDownload(text,0));
+}
+void test_language_boot_uses_backup_after_interrupted_promotion() {
+    JsonDocument doc;
+    deserializeJson(doc,completeDownload()); doc["wifi_setup_title"] = "Backup loaded";
+    backupLanguage = ""; serializeJson(doc,backupLanguage);
+    I18n::instance().init("de");
+    TEST_ASSERT_EQUAL_STRING("Backup loaded",t("wifi_setup_title"));
+    backupLanguage = "";
+}
+
 int main() {
     UNITY_BEGIN();
     RUN_TEST(test_identical_formats_match);
@@ -128,5 +178,10 @@ int main() {
     RUN_TEST(test_tf_passes_through_an_untranslated_key);
     RUN_TEST(test_tf_on_an_unknown_key_matches_t);
     RUN_TEST(test_english_defaults_have_parseable_specifiers);
+    RUN_TEST(test_language_download_complete_and_no_downgrade);
+    RUN_TEST(test_language_download_rejects_bad_json_shape_and_size);
+    RUN_TEST(test_language_download_requires_all_keys_and_safe_formats);
+    RUN_TEST(test_language_download_rejects_non_strings_and_overflow);
+    RUN_TEST(test_language_boot_uses_backup_after_interrupted_promotion);
     return UNITY_END();
 }

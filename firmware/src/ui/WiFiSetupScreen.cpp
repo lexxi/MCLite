@@ -163,6 +163,13 @@ void WiFiSetupScreen::create(lv_obj_t* parent) {
     _nodesButtonLabel = lv_label_create(_nodesBtn);
     lv_obj_set_style_text_font(_nodesButtonLabel,FONT_BODY,0);
     lv_obj_center(_nodesButtonLabel);
+    _langBtn = lv_btn_create(cont);
+    lv_obj_set_width(_langBtn,LV_PCT(100));
+    lv_obj_set_style_bg_color(_langBtn,theme::ACCENT(),0);
+    lv_obj_add_event_cb(_langBtn,langBtnCb,LV_EVENT_CLICKED,this);
+    _langButtonLabel = lv_label_create(_langBtn);
+    lv_obj_set_style_text_font(_langButtonLabel,FONT_BODY,0);
+    lv_obj_center(_langButtonLabel);
     _nodesStatus = lv_label_create(cont);
     lv_obj_set_width(_nodesStatus,LV_PCT(100));
     lv_obj_set_style_text_font(_nodesStatus,FONT_BODY,0);
@@ -255,6 +262,7 @@ void WiFiSetupScreen::hide() {
         lv_group_remove_obj(_apBtn);
         lv_group_remove_obj(_checkBtn);
         lv_group_remove_obj(_nodesBtn);
+        lv_group_remove_obj(_langBtn);
         lv_group_remove_obj(_rebootBtn);
     }
     // Leave WiFi connected if the user turned it on — the status-bar icon reflects it.
@@ -300,7 +308,8 @@ void WiFiSetupScreen::updateStatusUi() {
         if (g) { lv_group_add_obj(g, _rebootBtn); lv_group_add_obj(g, _backBtn); }
         return;
     }
-    lv_obj_add_flag(_rebootBtn, LV_OBJ_FLAG_HIDDEN);
+    if (NodeDirectoryDownload::instance().languageSaved()) lv_obj_clear_flag(_rebootBtn,LV_OBJ_FLAG_HIDDEN);
+    else lv_obj_add_flag(_rebootBtn,LV_OBJ_FLAG_HIDDEN);
 
     bool connected = wm.isConnected();
     if (connected) {
@@ -321,9 +330,13 @@ void WiFiSetupScreen::updateStatusUi() {
     }
 
     if (NodeDirectoryDownload::instance().busy()) {
+        lv_obj_add_state(_rebootBtn,LV_STATE_DISABLED);
         lv_obj_add_state(_checkBtn,LV_STATE_DISABLED);
         lv_obj_add_state(_apBtn,LV_STATE_DISABLED);
-    } else lv_obj_clear_state(_checkBtn,LV_STATE_DISABLED);
+    } else {
+        lv_obj_clear_state(_checkBtn,LV_STATE_DISABLED);
+        lv_obj_clear_state(_rebootBtn,LV_STATE_DISABLED);
+    }
 
     // WiFi companion row — only operable while WiFi is connected.
     auto& comp = CompanionService::instance();
@@ -360,6 +373,8 @@ void WiFiSetupScreen::updateStatusUi() {
         lv_group_add_obj(grp, _autoUpdateSwitch);
         if (connected) lv_group_add_obj(grp, _checkBtn);
         lv_group_add_obj(grp,_nodesBtn);
+        lv_group_add_obj(grp,_langBtn);
+        if (NodeDirectoryDownload::instance().languageSaved()) lv_group_add_obj(grp,_rebootBtn);
         lv_group_add_obj(grp, _backBtn);
     }
 }
@@ -368,13 +383,22 @@ void WiFiSetupScreen::updateNodesUi() {
     auto& download = NodeDirectoryDownload::instance();
     const auto state = download.state();
     _nodesLastState = int(state); _nodesLastProgress = download.progress();
-    lv_label_set_text(_nodesButtonLabel,t(download.busy() ? "nodes_cancel" : "nodes_download"));
+    const bool german = download.kind() == NodeDirectoryDownload::Kind::German;
+    lv_label_set_text(_nodesButtonLabel,t(download.busy() && !german ? "nodes_cancel" : "nodes_download"));
+    lv_label_set_text(_langButtonLabel,t(download.busy() && german ? "nodes_cancel" : "lang_download_de"));
     const bool usable = download.busy() || (WiFiManager::instance().isConnected() &&
                          !ConfigPortal::instance().active() && SDCard::instance().isMounted());
-    if (usable) lv_obj_clear_state(_nodesBtn,LV_STATE_DISABLED);
+    if (usable && (!download.busy() || !german)) lv_obj_clear_state(_nodesBtn,LV_STATE_DISABLED);
     else lv_obj_add_state(_nodesBtn,LV_STATE_DISABLED);
+    if (usable && (!download.busy() || german)) lv_obj_clear_state(_langBtn,LV_STATE_DISABLED);
+    else lv_obj_add_state(_langBtn,LV_STATE_DISABLED);
     char text[220];
-    if (state == NodeDirectoryDownload::State::Running || state == NodeDirectoryDownload::State::Ready)
+    if (german && state != NodeDirectoryDownload::State::Idle) {
+        const char* key = state == NodeDirectoryDownload::State::Saved ? "lang_download_saved" :
+                          state == NodeDirectoryDownload::State::Failed ?
+                            (download.error() == NodeDirectoryDownload::Error::Cancelled ? "nodes_cancelled" : "lang_download_failed") : "lang_download_busy";
+        snprintf(text,sizeof text,"%s",t(key));
+    } else if (state == NodeDirectoryDownload::State::Running || state == NodeDirectoryDownload::State::Ready)
         snprintf(text,sizeof text,tf("nodes_progress"),unsigned(download.progress()));
     else if (state == NodeDirectoryDownload::State::Saving) snprintf(text,sizeof text,"%s",t("nodes_saving"));
     else if (state == NodeDirectoryDownload::State::Saved)
@@ -386,10 +410,18 @@ void WiFiSetupScreen::updateNodesUi() {
     } else snprintf(text,sizeof text,tf("nodes_count"),unsigned(NodeDirectory::instance().table().count()));
     lv_label_set_text(_nodesStatus,text);
 }
+void WiFiSetupScreen::langBtnCb(lv_event_t* event) {
+    auto& download = NodeDirectoryDownload::instance();
+    if (download.busy()) {
+        if (download.kind() == NodeDirectoryDownload::Kind::German) download.cancel();
+    } else download.start(NodeDirectoryDownload::Kind::German);
+    static_cast<WiFiSetupScreen*>(lv_event_get_user_data(event))->updateStatusUi();
+}
 void WiFiSetupScreen::nodesBtnCb(lv_event_t* event) {
     auto& download = NodeDirectoryDownload::instance();
-    if (download.busy()) download.cancel();
-    else download.start();
+    if (download.busy()) {
+        if (download.kind() == NodeDirectoryDownload::Kind::Nodes) download.cancel();
+    } else download.start();
     static_cast<WiFiSetupScreen*>(lv_event_get_user_data(event))->updateStatusUi();
 }
 

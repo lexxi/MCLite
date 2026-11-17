@@ -5,7 +5,7 @@
 // All three are #ifndef-guarded so a fork can override them with -D build flags
 // (e.g. -DMCLITE_REPO_OWNER=\"someone\") to self-update from its own GitHub repo.
 #ifndef MCLITE_VERSION
-#define MCLITE_VERSION "0.4.6-ap.8"
+#define MCLITE_VERSION "0.4.6-ap.9"
 #endif
 #ifndef MCLITE_REPO_OWNER
 #define MCLITE_REPO_OWNER "lexxi"   // GitHub owner for OTA update checks
@@ -26,7 +26,7 @@ constexpr const char* FIRMWARE_VENDOR  = MCLITE_REPO_OWNER "/" MCLITE_REPO_NAME;
 // set the SAME number in each sdcard/mclite/lang/*.json "version". On boot I18n
 // warns (serial) if a loaded lang file's version is older — i.e. it predates the
 // current string set, so some keys will fall back to English.
-constexpr uint16_t LANG_VERSION = 65;   // + downloadable node directory
+constexpr uint16_t LANG_VERSION = 66;   // + WiFi German language download
 
 // Device
 constexpr const char* DEVICE_NAME = "MCLite";
